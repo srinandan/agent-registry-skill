@@ -13,36 +13,47 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 set -e
 
-BASE_URL="https://raw.githubusercontent.com/srinandan/agent-registry-skill/refs/heads/main"
-DEST="$HOME/.gemini/skills/agent-registry-skill"
+REPO="srinandan/agent-registry-skill"
+SKILL_FILE="agent-registry.skill"
+DEST="$HOME/.gemini/skills"
 
-# List of files to download
-FILES="SKILL.md references/adk-docs.md"
+# Check dependencies
+if ! command -v curl >/dev/null 2>&1; then
+  printf "Error: curl is required but not installed.\n"
+  exit 1
+fi
 
-download_files() {
-  printf "\nDownloading Agent Registry Skill items...\n"
-  
-  for FILE in $FILES; do
-    URL="$BASE_URL/$FILE"
-    TARGET="$DEST/$FILE"
-    
-    # Create directory for the file
-    mkdir -p "$(dirname "$TARGET")"
-    
-    printf "  Downloading $FILE...\n"
-    if ! curl -sL "$URL" -o "$TARGET"; then
-      printf "\nFailed to download $FILE from $URL\n"
-      exit 1
-    fi
-  done
-}
+if ! command -v unzip >/dev/null 2>&1; then
+  printf "Error: unzip is required but not installed.\n"
+  exit 1
+fi
 
-download_files
+# Resolve download URL — use pinned version if provided, otherwise latest
+if [ -n "$SKILL_VERSION" ]; then
+  DOWNLOAD_URL="https://github.com/$REPO/releases/download/$SKILL_VERSION/$SKILL_FILE"
+  printf "\nInstalling Agent Registry Skill %s...\n" "$SKILL_VERSION"
+else
+  DOWNLOAD_URL="https://github.com/$REPO/releases/latest/download/$SKILL_FILE"
+  printf "\nInstalling Agent Registry Skill (latest release)...\n"
+fi
 
-printf "\nAgent Registry Skill Download Complete!\n"
-printf "\n"
-printf "Files installed into $DEST folder.\n"
+# Download the .skill file
+TMP_FILE=$(mktemp /tmp/agent-registry-skill.XXXXXX.zip)
+printf "  Downloading %s...\n" "$SKILL_FILE"
+if ! curl -sL "$DOWNLOAD_URL" -o "$TMP_FILE"; then
+  printf "\nFailed to download %s from %s\n" "$SKILL_FILE" "$DOWNLOAD_URL"
+  rm -f "$TMP_FILE"
+  exit 1
+fi
+
+# Extract into skills directory
+mkdir -p "$DEST"
+printf "  Extracting into %s...\n" "$DEST"
+unzip -qo "$TMP_FILE" -d "$DEST/agent-registry-skill"
+rm -f "$TMP_FILE"
+
+printf "\nAgent Registry Skill installed successfully!\n"
+printf "Files installed into %s/agent-registry-skill/\n" "$DEST"
 printf "\n"
