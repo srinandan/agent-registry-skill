@@ -1,0 +1,21 @@
+{
+  "skill_name": "agent-registry",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Create a new A2A agent called my-a2a using the agent card in evals/files/agent_card.json",
+      "expected_output": "The skill generates the `gcloud alpha agent-registry services create my-a2a` command with `--agent-spec-type=a2a-agent-card` and uses the file content for `--agent-spec-content`.",
+      "files": [
+        "evals/files/agent_card.json"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Register a new GitHub MCP server using the spec from evals/files/mcp_spec.json",
+      "expected_output": "The skill generates the `gcloud alpha agent-registry services create github` command with `--mcp-server-spec-type=tool-spec` and uses the file content for `--mcp-server-spec-content`.",
+      "files": [
+        "evals/files/mcp_spec.json"
+      ]
+    }
+  ]
+}
