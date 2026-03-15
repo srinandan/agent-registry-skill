@@ -12,12 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: Package Skill
+name: Update Skill
 
 on:
   push:
-    tags:
-      - 'v*'   # triggers on version tags like v1.0.0
+    branches: [main]
+    paths:
+      - 'SKILL.md'
 
 permissions:
   contents: write
@@ -28,23 +29,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Get short SHA
-        id: vars
-        run: echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-
-      - name: Inject version into SKILL.md
-        run: |
-          TAG="${{ github.ref_name }}"
-          SHA="${{ steps.vars.outputs.sha }}"
-          VERSION="${TAG}+${SHA}"
-          sed -i "s/version: \".*\"/version: \"${VERSION}\"/" SKILL.md
-          echo "Injected version: ${VERSION}"
-
       - name: Build .skill file
         run: zip -r agent-registry.skill SKILL.md references/adk-docs.md
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: agent-registry.skill
-          generate_release_notes: true
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add agent-registry.skill
+          git diff --staged --quiet || git commit -m "chore: regenerate agent-registry.skill"
+          git push
