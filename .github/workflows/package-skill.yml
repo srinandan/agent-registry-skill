@@ -30,7 +30,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build .skill file
-        run: zip -r agent-registry.skill SKILL.md
+        run: zip -r agent-registry.skill SKILL.md references/adk-docs.md
 
       - name: Commit and push
         run: |

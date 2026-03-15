@@ -122,6 +122,11 @@ gcloud alpha agent-registry services create gemini-models \
 
 # List Endpoints
 gcloud alpha agent-registry endpoints list --location=us-central1
+
+# Update Endpoint Display Name
+gcloud alpha agent-registry services update gemini-models \
+  --display-name="Model Garden on Vertex AI" \
+  --location=us-central1
 ```
 
 ---
@@ -168,6 +173,7 @@ All commands support `--location` (required) and `--project` (optional).
 | "Show me all MCP servers where the runtime is my-runtime" | `gcloud alpha agent-registry mcp-servers list --location=us-central1 --filter="attributes.\"agentregistry.googleapis.com/system/RuntimeReference\".uri:my-runtime"` |
 | "List all global agents" | `gcloud alpha agent-registry agents list --location=global` |
 | "List global MCP servers" | `gcloud alpha agent-registry mcp-servers list --location=global` |
+| "Change display name of gemini-models to 'Vertex AI Model Garden'" | `gcloud alpha agent-registry services update gemini-models --display-name="..." --location=us-central1` |
 
 ---
 
@@ -279,3 +285,11 @@ If a command fails:
 2. Verify the `--location` (some resources may be in `global` or specific regions).
 3. Ensure JSON payloads for `--interfaces` or specs are correctly quoted for the shell.
 4. Check project permissions for `agentregistry.googleapis.com`.
+
+---
+
+## ADK Reference
+
+If the user asks about ADK, read `references/adk-docs.md` for instructions
+on which URL to fetch.
+

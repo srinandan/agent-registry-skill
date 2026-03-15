@@ -16,27 +16,33 @@
 
 set -e
 
-URL="https://raw.githubusercontent.com/srinandan/agent-registry-skill/refs/heads/main/SKILL.md"
+BASE_URL="https://raw.githubusercontent.com/srinandan/agent-registry-skill/refs/heads/main"
 DEST="$HOME/.gemini/skills/agent-registry-skill"
 
-download_cli() {
-  printf "\nDownloading Agent Registry Skill...\n"
+# List of files to download
+FILES="SKILL.md references/adk-docs.md"
+
+download_files() {
+  printf "\nDownloading Agent Registry Skill items...\n"
   
-  if ! curl -o /dev/null -sIf "$URL"; then
-    printf "\nAgent Registry Skill is not found, please specify a valid Agent Registry Skill URL\n"
-    exit 1
-  fi
-
-  # Create destination directory
-  mkdir -p "$DEST"
-
-  # Download the file
-  curl -sL "$URL" -o "$DEST/SKILL.md"
+  for FILE in $FILES; do
+    URL="$BASE_URL/$FILE"
+    TARGET="$DEST/$FILE"
+    
+    # Create directory for the file
+    mkdir -p "$(dirname "$TARGET")"
+    
+    printf "  Downloading $FILE...\n"
+    if ! curl -sL "$URL" -o "$TARGET"; then
+      printf "\nFailed to download $FILE from $URL\n"
+      exit 1
+    fi
+  done
 }
 
-download_cli
+download_files
 
 printf "\nAgent Registry Skill Download Complete!\n"
 printf "\n"
-printf "Copied Agent Registry Skill into $DEST folder.\n"
+printf "Files installed into $DEST folder.\n"
 printf "\n"
