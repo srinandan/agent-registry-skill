@@ -1,0 +1,25 @@
+# .github/workflows/package-skill.yml
+name: Package Skill
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'SKILL.md'
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build .skill file
+        run: zip -r agent-registry.skill SKILL.md
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add agent-registry.skill
+          git diff --staged --quiet || git commit -m "chore: regenerate agent-registry.skill"
+          git push
