@@ -8,6 +8,7 @@ A skill for the Gemini CLI and AI agents to interact with Google Cloud's Agent R
 - **Resource Management**: Create, list, describe, and delete Agents, MCP Servers, and Endpoints.
 - **Smart Approvals**: Executes read-only commands (`list`, `describe`) immediately, while requesting approval for mutating commands (`create`, `update`, `delete`).
 - **Rich Examples**: Built-in support for registering common resources like GitHub MCP Servers, Salesforce Agents, and Vertex AI Model Garden endpoints.
+- **Python ADK Integration**: Specialized support and snippets for the Google Agent Development Kit (ADK).
 
 ## Installation
 
@@ -33,8 +34,9 @@ Once installed, you can talk to Gemini in natural language:
 
 ## Prerequisites
 
-- [Google Cloud SDK (gcloud)](https://cloud.google.com/sdk/docs/install) installed.
-- `gcloud alpha` component installed (`gcloud components install alpha`).
+- [Google Cloud SDK](https://cloud.google.com/sdk/docs/install) version **560.0.0** or higher (minimum).
+- `gcloud alpha` component version **2026.03.09** or higher (minimum).
+- **Google ADK** version **1.26.0** or higher (minimum) for Python integration.
 - Proper permissions to access Agent Registry in your Google Cloud project.
 
 ## Contributing

@@ -5,7 +5,8 @@ description: >
   using gcloud commands. Triggers on any mention of "agent registry", "agent-registry",
   "mcp-servers", "gcloud agents", "register an agent", "list agents", "create a service",
   "agent service", or any request to manage agents, MCP servers, endpoints, or services
-  in Google Cloud Agent Registry.
+  in Google Cloud Agent Registry. Also triggers on requests to integrate or use the
+  Google Agent Development Kit (ADK) with the Agent Registry.
 metadata:
   author: srinandan
   version: "0.1"
@@ -74,6 +75,9 @@ gcloud alpha agent-registry mcp-servers list --location=us-central1
 gcloud alpha agent-registry mcp-servers list \
   --location=us-central1 \
   --filter="attributes.\"agentregistry.googleapis.com/system/RuntimeReference\".uri:reasoningEngine"
+
+# List Global MCP Servers
+gcloud alpha agent-registry mcp-servers list --location=global
 ```
 
 ### 2. Agents
@@ -99,6 +103,9 @@ gcloud alpha agent-registry services create testa2a \
 
 # List Agents
 gcloud alpha agent-registry agents list --location=us-central1
+
+# List Global Agents
+gcloud alpha agent-registry agents list --location=global
 ```
 
 ### 3. Endpoints
@@ -125,9 +132,9 @@ All commands support `--location` (required) and `--project` (optional).
 
 | Group | Commands |
 |-------|----------|
-| `agents` | `list`, `describe`, `delete` |
-| `mcp-servers` | `list`, `describe`, `delete` |
-| `endpoints` | `list`, `describe`, `delete` |
+| `agents` | `list`, `describe` |
+| `mcp-servers` | `list`, `describe` |
+| `endpoints` | `list`, `describe` |
 | `services` | `create`, `list`, `describe`, `update`, `delete` |
 | `operations` | `list`, `describe` |
 
@@ -159,12 +166,17 @@ All commands support `--location` (required) and `--project` (optional).
 | "Show agents with identity containing 'service-432423'" | `gcloud alpha agent-registry agents list --location=us-central1 --filter="attributes.\"agentregistry.googleapis.com/system/RuntimeIdentity\".principal:service-432423"` |
 | "Create a new A2A agent called my-a2a" | `gcloud alpha agent-registry services create my-a2a --agent-spec-type=a2a-agent-card ...` |
 | "Show me all MCP servers where the runtime is my-runtime" | `gcloud alpha agent-registry mcp-servers list --location=us-central1 --filter="attributes.\"agentregistry.googleapis.com/system/RuntimeReference\".uri:my-runtime"` |
+| "List all global agents" | `gcloud alpha agent-registry agents list --location=global` |
+| "List global MCP servers" | `gcloud alpha agent-registry mcp-servers list --location=global` |
 
 ---
 
 ## Advanced Filtering
 
 To filter resources based on nested attributes with special characters (like dots or slashes), use double quotes around the key segments in the `--filter` flag.
+
+> [!WARNING]
+> The double-quote escaping shown below (`\"`) works in bash/zsh. Windows CMD or PowerShell users may need different escaping (e.g., `"` or ``` `"` ``) for nested attribute keys.
 
 **Mapping Tips**:
 - Map **"runtime"** to `attributes."agentregistry.googleapis.com/system/RuntimeReference".uri`.
@@ -180,6 +192,68 @@ gcloud alpha agent-registry agents list \
 gcloud alpha agent-registry agents list \
   --location=us-central1 \
   --filter="attributes.\"agentregistry.googleapis.com/system/RuntimeIdentity\".principal:service-432423"
+```
+
+---
+
+## Python ADK Integration
+
+The Google Agent Development Kit (ADK) allows seamless integration with the Agent Registry.
+
+### 1. Requirements & Setup
+- **ADK Version**: 1.26.0 or higher (minimum).
+- **Installation**:
+  ```bash
+  # Using pip
+  pip install --upgrade google-adk
+
+  # Using uv
+  uv add google-adk
+  ```
+
+### 2. Import & Usage
+Add the following import to your Python code:
+```python
+from google.adk.integrations.agent_registry import AgentRegistry
+```
+
+### 3. Invoking an MCP Server from Registry
+Use this snippet to retrieve and use an MCP toolset:
+```python
+import os
+from google.adk.integrations.agent_registry import AgentRegistry
+
+# Initialize registry client
+registry = AgentRegistry(project_id=SESSION_PROJECT, location=SESSION_LOCATION)
+
+# Retrieve MCP Toolset using the full resource name
+# Example resource name: projects/PRJ/locations/LOC/mcpServers/SERVER_NAME
+mcp_toolset = registry.get_mcp_toolset(
+    f"projects/{SESSION_PROJECT}/locations/{SESSION_LOCATION}/mcpServers/{MCP_SERVER_NAME}"
+)
+```
+
+### 4. Integrating a Remote A2A Agent
+Use this snippet to use a registry agent as a sub-agent:
+```python
+from google.adk import Agent, Gemini, types
+from google.adk.integrations.agent_registry import AgentRegistry
+
+# Initialize registry client
+registry = AgentRegistry(project_id=SESSION_PROJECT, location=SESSION_LOCATION)
+
+# Retrieve Remote A2A Agent
+remote_agent = registry.get_remote_a2a_agent(
+    f"projects/{SESSION_PROJECT}/locations/{SESSION_LOCATION}/agents/{AGENT_NAME}"
+)
+
+# Define a new Agent with the remote agent as a sub-agent
+help_agent = Agent(
+    name="help_agent",
+    description="Helpful AI Assistant that uses a remote agent.",
+    model=Gemini(model="gemini-2.0-flash"),
+    sub_agents=[remote_agent]
+)
 ```
 
 ---
@@ -200,6 +274,8 @@ Only ask for what's strictly needed — don't overwhelm the user.
 
 If a command fails:
 1. Check if `gcloud alpha` component is installed.
+   - Required (minimum): **Google Cloud SDK 560.0.0 or higher**
+   - Required (minimum): **alpha component 2026.03.09 or higher**
 2. Verify the `--location` (some resources may be in `global` or specific regions).
 3. Ensure JSON payloads for `--interfaces` or specs are correctly quoted for the shell.
 4. Check project permissions for `agentregistry.googleapis.com`.
