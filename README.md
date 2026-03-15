@@ -18,8 +18,6 @@ A skill for the Gemini CLI and AI agents to interact with Google Cloud's Agent R
 curl -L https://raw.githubusercontent.com/srinandan/agent-registry-skill/refs/heads/main/installSkill.sh | sh -
 ```
 
-### Manual Installation (Local)
-
 ## Usage Examples
 
 Once installed, you can talk to Gemini in natural language:
