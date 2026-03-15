@@ -12,12 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# This action automatically updates the agent-registry.skill file
 name: Package Skill
 
 on:
   push:
     tags:
       - 'v*'   # triggers on version tags like v1.0.0
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -42,6 +44,7 @@ jobs:
 
       - name: Build .skill file
         run: zip -r agent-registry.skill SKILL.md references/adk-docs.md
+
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
