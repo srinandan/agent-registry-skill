@@ -24,8 +24,6 @@ curl -L https://raw.githubusercontent.com/srinandan/agent-registry-skill/refs/he
 ```
 ```
 
-### Manual Installation (Local)
-
 ## Usage Examples
 
 Once installed, you can talk to Gemini in natural language:
