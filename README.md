@@ -26,7 +26,6 @@ To install a specific version or branch, set the `SKILL_VERSION` environment var
 ```bash
 curl -L https://raw.githubusercontent.com/srinandan/agent-registry-skill/refs/heads/main/installSkill.sh | SKILL_VERSION=v1.0.0 sh -
 ```
-```
 
 ## Usage Examples
 
