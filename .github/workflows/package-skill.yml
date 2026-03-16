@@ -43,7 +43,7 @@ jobs:
           echo "Injected version: ${VERSION}"
 
       - name: Build .skill file
-        run: zip -r agent-registry.skill SKILL.md references/adk-docs.md
+        run: zip -r agent-registry.skill SKILL.md references/adk-docs.md references/gcloud-command.md
 
 
       - name: Create GitHub Release
