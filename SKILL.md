@@ -273,7 +273,7 @@ remote_agent = registry.get_remote_a2a_agent(
 help_agent = Agent(
     name="help_agent",
     description="Helpful AI Assistant that uses a remote agent.",
-    model=Gemini(model="gemini-2.0-flash"),
+    model=Gemini(model="gemini-2.5-flash"),
     sub_agents=[remote_agent]
 )
 ```
