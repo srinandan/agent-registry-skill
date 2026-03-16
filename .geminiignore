@@ -1,0 +1,12 @@
+# Ignore all files by default
+*
+
+# Include SKILL.md
+!SKILL.md
+
+# Include the references directory and all its contents
+!references/
+!references/**
+
+# Also include .geminiignore itself
+!.geminiignore
