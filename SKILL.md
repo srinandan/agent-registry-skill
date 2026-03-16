@@ -48,6 +48,14 @@ gcloud config set project PROJECT_ID
 gcloud config set api_endpoint_overrides/agentregistry https://agentregistry.googleapis.com/
 ```
 
+### IAM Permissions
+
+| Role | Access Level |
+|------|--------------|
+| `roles/agentregistry.admin` | Full administrative access |
+| `roles/agentregistry.editor` | Editor access |
+| `roles/agentregistry.viewer` | Read only access |
+
 ---
 
 ## Resource Types & Registration

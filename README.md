@@ -16,6 +16,12 @@ A skill for the Gemini CLI and AI agents to interact with Google Cloud's Agent R
 
 ```bash
 curl -L https://raw.githubusercontent.com/srinandan/agent-registry-skill/refs/heads/main/installSkill.sh | sh -
+
+To install a specific version or branch, set the `SKILL_VERSION` environment variable:
+
+```bash
+curl -L https://raw.githubusercontent.com/srinandan/agent-registry-skill/refs/heads/main/installSkill.sh | SKILL_VERSION=v1.0.0 sh -
+```
 ```
 
 ### Manual Installation (Local)
@@ -38,6 +44,16 @@ Once installed, you can talk to Gemini in natural language:
 - `gcloud alpha` component version **2026.03.09** or higher (minimum).
 - **Google ADK** version **1.26.0** or higher (minimum) for Python integration.
 - Proper permissions to access Agent Registry in your Google Cloud project.
+
+## Permissions
+
+The following IAM roles are required to interact with the Agent Registry:
+
+| Role | Access Level |
+|------|--------------|
+| `roles/agentregistry.admin` | Full administrative access |
+| `roles/agentregistry.editor` | Editor access |
+| `roles/agentregistry.viewer` | Read only access |
 
 ## Contributing
 Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to contribute to this project.
