@@ -1,5 +1,9 @@
 # Google Cloud Agent Registry Skill
 
+[![CI](https://github.com/srinandan/agent-registry-skill/actions/workflows/ci.yml/badge.svg)](https://github.com/srinandan/agent-registry-skill/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/srinandan/agent-registry-skill)](https://github.com/srinandan/agent-registry-skill/releases)
+[![License](https://img.shields.io/github/license/srinandan/agent-registry-skill)](LICENSE)
+
 A skill for the Gemini CLI and AI agents to interact with Google Cloud's Agent Registry using `gcloud alpha agent-registry` commands.
 
 ## Features
@@ -34,7 +38,9 @@ Once installed, you can talk to Gemini in natural language:
 -   *"Show me all registered endpoints"*
 -   *"Delete the service called old-test-service"*
 -   *"Show me all the agents where the runtime is reasoningEngine"*
--   *"Show all agents with identity matching 'my-service-sa'"*
+-   *"Show agents with identity matching 'my-service-sa'"*
+-   *"Which MCP Server has a tool named search_documents?"*
+-   *"List agents based on reasoning engine in us-central1"*
 
 ## Prerequisites
 

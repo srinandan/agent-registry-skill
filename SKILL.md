@@ -182,6 +182,11 @@ All commands support `--location` (required) and `--project` (optional).
 | "List all global agents" | `gcloud alpha agent-registry agents list --location=global` |
 | "List global MCP servers" | `gcloud alpha agent-registry mcp-servers list --location=global` |
 | "Change display name of gemini-models to 'Vertex AI Model Garden'" | `gcloud alpha agent-registry services update gemini-models --display-name="..." --location=us-central1` |
+| "Which agents in us-central1 are based on reasoning engine?" | `gcloud alpha agent-registry agents list --location=us-central1 --filter="attributes.\"agentregistry.googleapis.com/system/RuntimeReference\".uri:reasoningEngine"` |
+| "List all vertex ai agents" | `gcloud alpha agent-registry agents list --location=us-central1 --filter="attributes.\"agentregistry.googleapis.com/system/RuntimeReference\".uri:reasoningEngine"` |
+| "Show agents with agent engine runtime" | `gcloud alpha agent-registry agents list --location=us-central1 --filter="attributes.\"agentregistry.googleapis.com/system/RuntimeReference\".uri:reasoningEngine"` |
+| "Which MCP Server has a tool named search_documents?" | `gcloud alpha agent-registry mcp-servers list --location=us-central1 --filter="tools.name:search_documents"` |
+| "Find all servers with the get_document tool" | `gcloud alpha agent-registry mcp-servers list --location=us-central1 --filter="tools.name:get_document"` |
 
 ---
 
@@ -195,6 +200,9 @@ To filter resources based on nested attributes with special characters (like dot
 **Mapping Tips**:
 - Map **"runtime"** to `attributes."agentregistry.googleapis.com/system/RuntimeReference".uri`.
 - Map **"identity"** to `attributes."agentregistry.googleapis.com/system/RuntimeIdentity".principal`.
+- Map **"tool name"** or **"tool"** to `tools.name` for MCP Server list commands.
+- **Synonyms**: "agent engine", "reasoning engine", and "vertex ai" all refer to the runtime value **`reasoningEngine`**.
+- **Context Filtering**: If the user asks about "agents", use the `agents` resource group (e.g., `gcloud alpha agent-registry agents list`), not `mcp-servers` or `endpoints`.
 
 ```bash
 # Example: Show all agents where the runtime is reasoningEngine
