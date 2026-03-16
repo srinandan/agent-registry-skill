@@ -294,6 +294,18 @@ If a command fails:
 3. Ensure JSON payloads for `--interfaces` or specs are correctly quoted for the shell.
 4. Check project permissions for `agentregistry.googleapis.com`.
 
+### Bug Reporting
+
+If you encounter an unexpected problem, bug, or a failure that you cannot resolve:
+1. Ask the user if they would like to create a GitHub issue for this bug.
+2. If the user agrees, generate a descriptive title and body for the issue based on the error context.
+3. Show the user the proposed issue content and the command to create it.
+4. Ask for final approval before running the command.
+5. Once approved, use the `gh` CLI to create the issue in the repository. For example:
+   ```bash
+   gh issue create --repo agentskills/agent-registry-skill --title "Title of the bug" --body "Description of the bug, including error messages and steps to reproduce."
+   ```
+
 ---
 
 ## ADK Reference
