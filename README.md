@@ -20,6 +20,7 @@ A skill for the Gemini CLI and AI agents to interact with Google Cloud's Agent R
 
 ```bash
 curl -L https://raw.githubusercontent.com/srinandan/agent-registry-skill/refs/heads/main/installSkill.sh | sh -
+```
 
 To install a specific version or branch, set the `SKILL_VERSION` environment variable:
 
