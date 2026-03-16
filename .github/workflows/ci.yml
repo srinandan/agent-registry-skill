@@ -13,9 +13,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Run ShellCheck
-        uses: koalaman/shellcheck-action@v2
+        uses: ludeeus/action-shellcheck@master
         with:
-          path: installSkill.sh
+          scandir: './'
+          format: tty
+          severity: error
 
   validate-skill:
     name: Validate SKILL.md
