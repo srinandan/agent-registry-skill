@@ -137,6 +137,41 @@ gcloud alpha agent-registry services update gemini-models \
   --location=us-central1
 ```
 
+## Agent Dashboard
+
+The Agent Dashboard provides a consolidated view of all agents in the current project, searching across both `global` and the regional location (default: `us-central1`).
+
+To generate the dashboard, run:
+```bash
+./scripts/agent-dashboard.sh
+```
+
+The output will be a Markdown table containing the following fields:
+- **Name**: The ID of the agent.
+- **Display Name**: The human-readable name.
+- **Location**: The region where the agent is registered.
+- **Runtime**: The reference to the agent's runtime.
+- **Identity**: The service account or principal associated with the agent.
+- **Created**: The date the agent was created.
+
+### MCP Server Dashboard
+
+The MCP Server Dashboard provides a consolidated view of all MCP servers in the current project, searching across both `global` and the regional location (default: `us-central1`).
+
+To generate the dashboard, run:
+```bash
+./scripts/mcp-dashboard.sh
+```
+
+The output will be a Markdown table containing the following fields:
+- **Name**: The ID of the MCP server.
+- **Display Name**: The human-readable name.
+- **Location**: The region where it is registered.
+- **Tools**: List of tools provided by the server.
+- **Runtime**: The reference to the runtime.
+- **Identity**: The service account or principal.
+- **Created**: The date it was created.
+
 ---
 
 ## Detailed Command Reference
@@ -181,6 +216,8 @@ All commands support `--location` (required) and `--project` (optional).
 | "Show me all MCP servers where the runtime is my-runtime" | `gcloud alpha agent-registry mcp-servers list --location=us-central1 --filter="attributes.\"agentregistry.googleapis.com/system/RuntimeReference\".uri:my-runtime"` |
 | "List all global agents" | `gcloud alpha agent-registry agents list --location=global` |
 | "List global MCP servers" | `gcloud alpha agent-registry mcp-servers list --location=global` |
+| "show me a dashboard for my agents" | `./scripts/agent-dashboard.sh` |
+| "show me a dashboard for my mcp servers" | `./scripts/mcp-dashboard.sh` |
 | "Change display name of gemini-models to 'Vertex AI Model Garden'" | `gcloud alpha agent-registry services update gemini-models --display-name="..." --location=us-central1` |
 | "Which agents in us-central1 are based on reasoning engine?" | `gcloud alpha agent-registry agents list --location=us-central1 --filter="attributes.\"agentregistry.googleapis.com/system/RuntimeReference\".uri:reasoningEngine"` |
 | "List all vertex ai agents" | `gcloud alpha agent-registry agents list --location=us-central1 --filter="attributes.\"agentregistry.googleapis.com/system/RuntimeReference\".uri:reasoningEngine"` |
