@@ -50,9 +50,9 @@ echo "$GLOBAL_AGENTS $REGIONAL_AGENTS" | jq -s 'add | map({
   name: (.name | split("/") | last),
   displayName: .displayName,
   location: (.name | split("/") | .[3]),
-  runtime: .attributes["agentregistry.googleapis.com/system/RuntimeReference"].uri,
-  identity: .attributes["agentregistry.googleapis.com/system/RuntimeIdentity"].principal,
-  createTime: .createTime
+  runtime: (if .attributes["agentregistry.googleapis.com/system/RuntimeReference"].uri then 
+              (.attributes["agentregistry.googleapis.com/system/RuntimeReference"].uri | sub("^//"; "") | split("/") | if length > 4 then .[-2:] | join("/") else .[-1] end) 
+            else "-" end)
 })' > /tmp/agents_combined.json
 
 # Check if we have agents
@@ -64,6 +64,7 @@ if [ "$COUNT" -eq 0 ]; then
 fi
 
 # Output Markdown Table
-echo "| Name | Display Name | Location | Runtime | Identity | Created |"
-echo "|------|--------------|----------|---------|----------|---------|"
-jq -r '.[] | "| \(.name) | \(.displayName // "-") | \(.location) | \(.runtime // "-") | \(.identity // "-") | \(.createTime | split("T") | .[0]) |"' /tmp/agents_combined.json
+echo ""
+echo "| Name | Display Name | Location | Runtime |"
+echo "|------|--------------|----------|---------|"
+jq -r '.[] | "| \(.name) | \(.displayName // "-") | \(.location) | \(.runtime // "-") |"' /tmp/agents_combined.json

@@ -151,8 +151,6 @@ The output will be a Markdown table containing the following fields:
 - **Display Name**: The human-readable name.
 - **Location**: The region where the agent is registered.
 - **Runtime**: The reference to the agent's runtime.
-- **Identity**: The service account or principal associated with the agent.
-- **Created**: The date the agent was created.
 
 ### MCP Server Dashboard
 
@@ -169,8 +167,6 @@ The output will be a Markdown table containing the following fields:
 - **Location**: The region where it is registered.
 - **Tools**: List of tools provided by the server.
 - **Runtime**: The reference to the runtime.
-- **Identity**: The service account or principal.
-- **Created**: The date it was created.
 
 ---
 

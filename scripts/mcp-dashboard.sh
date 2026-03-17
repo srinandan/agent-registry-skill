@@ -50,10 +50,10 @@ echo "$GLOBAL_MCP $REGIONAL_MCP" | jq -s 'add | map({
   name: (.name | split("/") | last),
   displayName: .displayName,
   location: (.name | split("/") | .[3]),
-  tools: (.tools | map(.name) | join(", ")),
-  runtime: .attributes["agentregistry.googleapis.com/system/RuntimeReference"].uri,
-  identity: .attributes["agentregistry.googleapis.com/system/RuntimeIdentity"].principal,
-  createTime: .createTime
+  tools: (.tools | map(.name) | if length > 3 then (.[0:3] | join(", ")) + ", ..." else join(", ") end),
+  runtime: (if .attributes["agentregistry.googleapis.com/system/RuntimeReference"].uri then 
+              (.attributes["agentregistry.googleapis.com/system/RuntimeReference"].uri | sub("^//"; "") | split("/") | if length > 4 then .[-2:] | join("/") else .[-1] end) 
+            else "-" end)
 })' > /tmp/mcp_combined.json
 
 # Check if we have servers
@@ -65,6 +65,7 @@ if [ "$COUNT" -eq 0 ]; then
 fi
 
 # Output Markdown Table
-echo "| Name | Display Name | Location | Tools | Runtime | Identity | Created |"
-echo "|------|--------------|----------|-------|---------|----------|---------|"
-jq -r '.[] | "| \(.name) | \(.displayName // "-") | \(.location) | \(.tools // "-") | \(.runtime // "-") | \(.identity // "-") | \(.createTime | split("T") | .[0]) |"' /tmp/mcp_combined.json
+echo ""
+echo "| Name | Display Name | Location | Tools | Runtime |"
+echo "|------|--------------|----------|-------|---------|"
+jq -r '.[] | "| \(.name) | \(.displayName // "-") | \(.location) | \(.tools // "-") | \(.runtime // "-") |"' /tmp/mcp_combined.json
