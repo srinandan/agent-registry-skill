@@ -13,6 +13,7 @@ A skill for the Gemini CLI and AI agents to interact with Google Cloud's Agent R
 - **Smart Approvals**: Executes read-only commands (`list`, `describe`) immediately, while requesting approval for mutating commands (`create`, `update`, `delete`).
 - **Rich Examples**: Built-in support for registering common resources like GitHub MCP Servers, Salesforce Agents, and Vertex AI Model Garden endpoints.
 - **Python ADK Integration**: Specialized support and snippets for the Google Agent Development Kit (ADK).
+- **GKE Based Agents**: Support for configuring Kubernetes Deployments to act as Agents or MCP Servers.
 
 ## Installation
 
