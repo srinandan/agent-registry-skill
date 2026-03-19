@@ -52,7 +52,7 @@ BASE_URL="https://raw.githubusercontent.com/srinandan/agent-registry-skill/${SKI
 DEST="$HOME/.gemini/skills/agent-registry-skill"
 
 # List of files to download
-FILES="SKILL.md references/adk-docs.md references/gcloud-command.md scripts/agent-dashboard.sh scripts/mcp-dashboard.sh"
+FILES="SKILL.md references/adk-docs.md references/gcloud-command.md scripts/agent-dashboard.sh scripts/mcp-dashboard.sh scripts/annotate_gke.py"
 
 download_files() {
   printf "\nDownloading Agent Registry Skill (%s) items...\n" "${SKILL_VERSION}"
