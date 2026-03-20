@@ -137,6 +137,17 @@ gcloud alpha agent-registry services update gemini-models \
   --location=us-central1
 ```
 
+### 4. GKE Based Agents
+Used to configure Kubernetes deployments to be registered as an Agent or MCP Server. You can add the required `apphub.cloud.google.com/functional-type` annotation to YAML files using the provided python script.
+
+```bash
+# Ask the user if they want to process the current directory or a specific directory/file
+# Ask the user if the functional type is an AGENT or MCP_SERVER
+
+# Run the python script to annotate the YAML files
+./scripts/annotate_gke.py /path/to/folder_or_file.yaml --type AGENT
+```
+
 ## Agent Dashboard
 
 The Agent Dashboard provides a consolidated view of all agents in the current project, searching across both `global` and the regional location (default: `us-central1`).
@@ -202,6 +213,8 @@ All commands support `--location` (required) and `--project` (optional).
 | User says | Command |
 |-----------|---------|
 | "List my MCP servers" | `gcloud alpha agent-registry mcp-servers list --location=us-central1` |
+| "Configure this GKE deployment as an agent" | `./scripts/annotate_gke.py /path/to/folder_or_file.yaml --type AGENT` |
+| "Make my deployments in this folder MCP Servers" | `./scripts/annotate_gke.py /path/to/folder_or_file.yaml --type MCP_SERVER` |
 | "Show me information on agent X" | `gcloud alpha agent-registry agents describe X --location=us-central1` |
 | "Register a new GitHub MCP server with this spec..." | `gcloud alpha agent-registry services create github ... --mcp-server-spec-content='...'` |
 | "Check status of operation Y" | `gcloud alpha agent-registry operations describe Y --location=us-central1` |
@@ -320,6 +333,7 @@ Only ask if still missing after checking session context:
 - **project**: "Which project?" — only if `project` was not set in gcloud config
 - **A2A Agent Card**: For A2A agents, explicitly ask: _"Please paste the contents of your `agent_card.json` file."_ and use it for `--agent-spec-content`.
 - **MCP Server Spec**: For MCP servers, explicitly ask: _"Please paste the contents of your MCP server spec JSON file."_ and use it for `--mcp-server-spec-content`.
+- **GKE Deployments**: Ask for the target path (current folder, specific folder, or file) and the functional type (`AGENT` or `MCP_SERVER`).
 
 Only ask for what's strictly needed — don't overwhelm the user.
 
