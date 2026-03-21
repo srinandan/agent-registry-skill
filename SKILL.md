@@ -268,61 +268,13 @@ gcloud alpha agent-registry agents list \
 
 The Google Agent Development Kit (ADK) allows seamless integration with the Agent Registry.
 
-### 1. Requirements & Setup
-- **ADK Version**: 1.26.0 or higher (minimum).
-- **Installation**:
-  ```bash
-  # Using pip
-  pip install --upgrade google-adk
+For comprehensive details on how to build, deploy, or configure agents using Google's Agent Development Kit (ADK) and the Agent Registry, **you must read the `references/adk-docs.md` file**. It contains the complete guide for:
+- Initialization and Authentication
+- Discovering and Listing Resources (Agents and MCP Servers)
+- Using an MCP Toolset from the Registry
+- Integrating a Remote A2A Agent as a sub-agent
 
-  # Using uv
-  uv add google-adk
-  ```
-
-### 2. Import & Usage
-Add the following import to your Python code:
-```python
-from google.adk.integrations.agent_registry import AgentRegistry
-```
-
-### 3. Invoking an MCP Server from Registry
-Use this snippet to retrieve and use an MCP toolset:
-```python
-import os
-from google.adk.integrations.agent_registry import AgentRegistry
-
-# Initialize registry client
-registry = AgentRegistry(project_id=SESSION_PROJECT, location=SESSION_LOCATION)
-
-# Retrieve MCP Toolset using the full resource name
-# Example resource name: projects/PRJ/locations/LOC/mcpServers/SERVER_NAME
-mcp_toolset = registry.get_mcp_toolset(
-    f"projects/{SESSION_PROJECT}/locations/{SESSION_LOCATION}/mcpServers/{MCP_SERVER_NAME}"
-)
-```
-
-### 4. Integrating a Remote A2A Agent
-Use this snippet to use a registry agent as a sub-agent:
-```python
-from google.adk import Agent, Gemini, types
-from google.adk.integrations.agent_registry import AgentRegistry
-
-# Initialize registry client
-registry = AgentRegistry(project_id=SESSION_PROJECT, location=SESSION_LOCATION)
-
-# Retrieve Remote A2A Agent
-remote_agent = registry.get_remote_a2a_agent(
-    f"projects/{SESSION_PROJECT}/locations/{SESSION_LOCATION}/agents/{AGENT_NAME}"
-)
-
-# Define a new Agent with the remote agent as a sub-agent
-help_agent = Agent(
-    name="help_agent",
-    description="Helpful AI Assistant that uses a remote agent.",
-    model=Gemini(model="gemini-2.5-flash"),
-    sub_agents=[remote_agent]
-)
-```
+**Important:** Whenever the user asks for code generation, code snippets, or how to use the ADK with the Agent Registry in Python, refer directly to `references/adk-docs.md`.
 
 ---
 
@@ -365,6 +317,5 @@ If you encounter an unexpected problem, bug, or a failure that you cannot resolv
 
 ## ADK Reference
 
-If the user asks about ADK, read `references/adk-docs.md` for instructions
-on which URL to fetch.
+If the user asks about ADK, read the complete guide in `references/adk-docs.md`.
 
