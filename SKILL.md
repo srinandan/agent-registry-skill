@@ -233,6 +233,8 @@ All commands support `--location` (required) and `--project` (optional).
 | "Show agents with agent engine runtime" | `gcloud alpha agent-registry agents list --location=us-central1 --filter="attributes.\"agentregistry.googleapis.com/system/RuntimeReference\".uri:reasoningEngine"` |
 | "Which MCP Server has a tool named search_documents?" | `gcloud alpha agent-registry mcp-servers list --location=us-central1 --filter="tools.name:search_documents"` |
 | "Find all servers with the get_document tool" | `gcloud alpha agent-registry mcp-servers list --location=us-central1 --filter="tools.name:get_document"` |
+| "Search for all reasoning engine agents by agent ID" | `gcloud alpha agent-registry agents list --location=us-central1 --filter="agentId:reason"` |
+| "Search for Cloud Run MCP servers by MCP Server ID" | `gcloud alpha agent-registry mcp-servers list --location=us-central1 --filter="mcpServerId:run"` |
 
 ---
 
@@ -242,6 +244,15 @@ To filter resources based on nested attributes with special characters (like dot
 
 > [!WARNING]
 > The double-quote escaping shown below (`\"`) works in bash/zsh. Windows CMD or PowerShell users may need different escaping (e.g., `"` or ``` `"` ``) for nested attribute keys.
+
+**Filtering by `agentId` and `mcpServerId`**:
+The `agentId` and `mcpServerId` fields uniquely identify an agent or MCP server and follow the [URN model](https://datatracker.ietf.org/doc/html/rfc8141).
+For agents, `agentId` always begins with: `urn:agent:projects-{project-number}:projects:{project-number}:locations:{location}:{other-segments}`
+For MCP servers, `mcpServerId` always begins with: `urn:mcp:projects-{project-number}:projects:{project-number}:locations:{location}:{other-segments}`
+The `{other-segments}` can vary based on the platform, for example:
+- **Reasoning Engine:** `aiplatform:reasoningEngines:{reasoning-engine-id}`
+- **GKE:** `container:clusters:{cluster-name}:k8s:namespaces:{namespace}:apps:deployments:{deployment-id}`
+You can filter agents and MCP servers by substring matching these fields. For example, `--filter="agentId:reason"` finds Reasoning Engine agents, and `--filter="mcpServerId:run"` finds Cloud Run MCP servers.
 
 **Mapping Tips**:
 - Map **"runtime"** to `attributes."agentregistry.googleapis.com/system/RuntimeReference".uri`.
@@ -260,6 +271,16 @@ gcloud alpha agent-registry agents list \
 gcloud alpha agent-registry agents list \
   --location=us-central1 \
   --filter="attributes.\"agentregistry.googleapis.com/system/RuntimeIdentity\".principal:service-432423"
+
+# Example: Search for all reasoning engine agents using the agentId
+gcloud alpha agent-registry agents list \
+  --location=us-central1 \
+  --filter="agentId:reason"
+
+# Example: Search for cloud run MCP servers using the mcpServerId
+gcloud alpha agent-registry mcp-servers list \
+  --location=us-central1 \
+  --filter="mcpServerId:run"
 ```
 
 ---
