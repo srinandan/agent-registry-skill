@@ -74,12 +74,72 @@ COMMANDS
      list
         (ALPHA) List agents.
 
+     search
+        (ALPHA) Search agents.
+
+
 NOTES
     This command is currently in alpha and might change without notice. If this
     command fails with API permission errors despite specifying the correct
     project, you might be trying to access an API with an invitation-only early
     access allowlist.
 ```
+
+#### `search`
+
+```text
+NAME
+    gcloud alpha agent-registry agents search - search agents
+
+SYNOPSIS
+    gcloud alpha agent-registry agents search --location=LOCATION
+        [--search-string=SEARCH_STRING] [--search-type=SEARCH_TYPE]
+        [GCLOUD_WIDE_FLAG ...]
+
+DESCRIPTION
+    (ALPHA) search agents
+
+EXAMPLES
+    To search all agents, run:
+
+        $ gcloud alpha agent-registry agents search
+
+REQUIRED FLAGS
+     Location resource - Parent value for SearchAgentsRequest This represents a
+     Cloud resource. (NOTE) Some attributes are not given arguments in this
+     group but can be set in other ways.
+
+     To set the project attribute:
+      ◆ provide the argument --location on the command line with a fully
+        specified name;
+      ◆ provide the argument --project on the command line;
+      ◆ set the property core/project.
+
+     This must be specified.
+
+       --location=LOCATION
+          ID of the location or fully qualified identifier for the location.
+
+          To set the location attribute:
+          ▸ provide the argument --location on the command line.
+
+OPTIONAL FLAGS
+     --search-string=SEARCH_STRING
+        Search criteria used to select the Agents to return. If no search
+        criteria is specified then all accessible Agents will be returned.
+
+        Search expressions can be used to restrict results based upon skills,
+        agentId, description, name and trust, where the operators =, NOT, AND
+        and OR can be used along with the suffix wildcard symbol *.
+
+     --search-type=SEARCH_TYPE
+        The type of search. If set, must be set to KEYWORD. SEARCH_TYPE must be
+        (only one value is supported):
+
+         keyword
+            Search for a keyword across all searchable fields.
+```
+
 
 ### endpoints
 
@@ -140,12 +200,55 @@ COMMANDS
      list
         (ALPHA) List mcpServers.
 
+     search
+        (ALPHA) Search mcpServers.
+
+
 NOTES
     This command is currently in alpha and might change without notice. If this
     command fails with API permission errors despite specifying the correct
     project, you might be trying to access an API with an invitation-only early
     access allowlist.
 ```
+
+#### `search`
+
+```text
+NAME
+    gcloud alpha agent-registry mcp-servers search - search MCP servers
+
+SYNOPSIS
+    gcloud alpha agent-registry mcp-servers search --location=LOCATION
+        [--search-string=SEARCH_STRING] [--search-type=SEARCH_TYPE]
+        [GCLOUD_WIDE_FLAG ...]
+
+DESCRIPTION
+    (ALPHA) search MCP servers
+
+EXAMPLES
+    To search all MCP servers, run:
+
+        $ gcloud alpha agent-registry mcp-servers search
+
+REQUIRED FLAGS
+     Location resource - Parent value for SearchMcpServersRequest This represents a
+     Cloud resource.
+
+     This must be specified.
+
+       --location=LOCATION
+          ID of the location or fully qualified identifier for the location.
+
+OPTIONAL FLAGS
+     --search-string=SEARCH_STRING
+        Search criteria used to select the MCP Servers to return. If no search
+        criteria is specified then all accessible MCP Servers will be returned.
+
+        Search expressions can be used to restrict results based upon mcpServerId,
+        name and displayName, where the operators =, NOT, AND and OR can be used
+        along with the suffix wildcard symbol *.
+```
+
 
 ### operations
 
