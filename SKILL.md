@@ -187,8 +187,8 @@ All commands support `--location` (required) and `--project` (optional).
 
 | Group | Commands |
 |-------|----------|
-| `agents` | `list`, `describe` |
-| `mcp-servers` | `list`, `describe` |
+| `agents` | `list`, `describe`, `search` |
+| `mcp-servers` | `list`, `describe`, `search` |
 | `endpoints` | `list`, `describe` |
 | `services` | `create`, `list`, `describe`, `update`, `delete` |
 | `operations` | `list`, `describe` |
@@ -235,6 +235,9 @@ All commands support `--location` (required) and `--project` (optional).
 | "Find all servers with the get_document tool" | `gcloud alpha agent-registry mcp-servers list --location=us-central1 --filter="tools.name:get_document"` |
 | "Search for all reasoning engine agents by agent ID" | `gcloud alpha agent-registry agents list --location=us-central1 --filter="agentId:reason"` |
 | "Search for Cloud Run MCP servers by MCP Server ID" | `gcloud alpha agent-registry mcp-servers list --location=us-central1 --filter="mcpServerId:run"` |
+| "Search for agents by skill name model" | `gcloud alpha agent-registry agents search --location=us-central1 --search-string="skills.name:model"` |
+| "Search for agents with display name containing Assessor" | `gcloud alpha agent-registry agents search --location=us-central1 --search-string="displayName:Assessor*"` |
+| "Search for MCP servers containing the display name GitHub" | `gcloud alpha agent-registry mcp-servers search --location=us-central1 --search-string="displayName:GitHub*"` |
 
 ---
 
@@ -284,6 +287,85 @@ gcloud alpha agent-registry mcp-servers list \
 ```
 
 ---
+
+## Searching Agents
+
+When searching for agents, **always default to using the `mcp_agentregistry_search_agents` MCP tool** if the `agentregistry` MCP server is available. Use the `gcloud alpha agent-registry agents search` command as a fallback.
+
+### MCP Tool Usage (`mcp_agentregistry_search_agents`)
+
+- **`parent`**: `projects/{project}/locations/{location}`
+- **`searchString`**: Follows the same syntax as the gcloud command (e.g., `skills.name:model`, `displayName:Assessor*`).
+
+### gcloud Fallback Usage
+
+You can search for agents using the `gcloud alpha agent-registry agents search` command. This command supports a `--search-string` flag with specific match types:
+
+- **Exact match (`=`)**: Matches the entire value exactly.
+  Example: `--search-string="agentId=\"urn:agent:projects-123:projects:123:locations:us-central1:agentregistry:services:my-agent\""`
+- **Token match (`:`)**: Matches individual words exactly.
+  Example: `--search-string="agentId:\"urn:agent:projects-123\""`
+- **Prefix match (`*`)**: Matches values that start with the given prefix.
+  Example: `--search-string="agentId:\"urn:agent:projects-123*\""`
+
+### Searchable Fields & Examples
+
+You can search across fields such as `agentId`, `displayName`, `skills.name`, `skills.id`, and `skills.description`. Note that values containing colons (like URNs) must be escaped.
+
+```bash
+# Search for agents by agentId (urn) with prefix match
+gcloud alpha agent-registry agents search --location=us-east4 \
+  --search-string="agentId:\"urn:agent:projects-1064111708665*\""
+
+# Search for agents containing the display name 'Assessor'
+gcloud alpha agent-registry agents search --location=us-east4 \
+  --search-string="displayName:Assessor*"
+
+# Search for agents by skill name
+gcloud alpha agent-registry agents search --location=us-east4 \
+  --search-string="skills.name:model"
+
+# Search for agents by skill id
+gcloud alpha agent-registry agents search --location=us-east4 \
+  --search-string="skills.id:AssessorAgent"
+
+# Search for agents by skill description
+gcloud alpha agent-registry agents search --location=us-east4 \
+  --search-string="skills.description:severity*"
+```
+
+---
+
+## Searching MCP Servers
+
+When searching for MCP servers, **always default to using the `mcp_agentregistry_search_mcp_servers` MCP tool** if the `agentregistry` MCP server is available. Use the `gcloud alpha agent-registry mcp-servers search` command as a fallback.
+
+### MCP Tool Usage (`mcp_agentregistry_search_mcp_servers`)
+
+- **`parent`**: `projects/{project}/locations/{location}`
+- **`searchString`**: Follows the same syntax as the gcloud command (e.g., `displayName:GitHub*`, `mcpServerId:run`).
+
+### gcloud Fallback Usage
+
+You can search for MCP servers using the `gcloud alpha agent-registry mcp-servers search` command. This command supports a `--search-string` flag with the same match types as agents (exact `=`, token `:`, prefix `*`).
+
+### Searchable Fields & Examples
+
+You can search across fields such as `mcpServerId`, `name`, and `displayName`. Note that values containing colons (like URNs) must be escaped.
+
+```bash
+# Search for MCP servers by mcpServerId with prefix match
+gcloud alpha agent-registry mcp-servers search --location=us-east4 \
+  --search-string="mcpServerId:\"urn:mcp:projects-1064111708665*\""
+
+# Search for MCP servers containing the display name 'GitHub'
+gcloud alpha agent-registry mcp-servers search --location=us-east4 \
+  --search-string="displayName:GitHub*"
+```
+
+---
+
+
 
 ## Python ADK Integration
 
