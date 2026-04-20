@@ -17,16 +17,10 @@ A skill for the Gemini CLI and AI agents to interact with Google Cloud's Agent R
 
 ## Installation
 
-`agent-registry-skill` is an Agent Skill that can be used with your favorite CLI. Run this script to download and install the latest version:
+You can install the `agent-registry-skill` using the GitHub CLI (`gh`):
 
 ```bash
-curl -L https://raw.githubusercontent.com/srinandan/agent-registry-skill/refs/heads/main/installSkill.sh | sh -
-```
-
-To install a specific version or branch, set the `SKILL_VERSION` environment variable:
-
-```bash
-curl -L https://raw.githubusercontent.com/srinandan/agent-registry-skill/refs/heads/main/installSkill.sh | SKILL_VERSION=v1.0.0 sh -
+gh skill install srinandan/agent-registry-skill
 ```
 
 ## Usage Examples
