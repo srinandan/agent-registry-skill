@@ -31,7 +31,7 @@ jobs:
       - name: Install dependencies
         run: pip install PyYAML
       - name: Validate SKILL.md
-        run: python3 .github/scripts/validate_skill.py SKILL.md
+        run: python3 .github/scripts/validate_skill.py agent-registry/SKILL.md
 
   link-check:
     name: Check for dead links
