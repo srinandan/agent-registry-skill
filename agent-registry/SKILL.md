@@ -148,6 +148,39 @@ Used to configure Kubernetes deployments to be registered as an Agent or MCP Ser
 ./scripts/annotate_gke.py /path/to/folder_or_file.yaml --type AGENT
 ```
 
+### 5. Bindings
+Used to connect a source agent to a target resource (another agent, MCP server, or endpoint) or an auth provider for delegated permissions.
+
+```bash
+# Create a binding to connect a source agent to a target resource
+gcloud alpha agent-registry bindings create BINDING_NAME \
+  --location=us-central1 \
+  --display-name="My Custom Binding" \
+  --source-identifier="SOURCE_ID" \
+  --target-identifier="TARGET_ID"
+
+# Create a binding for delegated permissions (using an auth provider)
+gcloud alpha agent-registry bindings create BINDING_NAME \
+  --location=us-central1 \
+  --display-name="Auth Provider Binding" \
+  --source-identifier="SOURCE_ID" \
+  --auth-provider="projects/PROJECT_ID/locations/REGION/connectors/AUTH_PROVIDER_ID"
+
+# List Bindings
+gcloud alpha agent-registry bindings list --location=us-central1
+
+# View Binding Details
+gcloud alpha agent-registry bindings describe BINDING_NAME --location=us-central1
+
+# Update a Binding
+gcloud alpha agent-registry bindings update BINDING_NAME \
+  --display-name="New Display Name" \
+  --location=us-central1
+
+# Delete a Binding
+gcloud alpha agent-registry bindings delete BINDING_NAME --location=us-central1
+```
+
 ## Agent Dashboard
 
 The Agent Dashboard provides a consolidated view of all agents in the current project, searching across both `global` and the regional location (default: `us-central1`).
@@ -191,6 +224,7 @@ All commands support `--location` (required) and `--project` (optional).
 | `mcp-servers` | `list`, `describe`, `search` |
 | `endpoints` | `list`, `describe` |
 | `services` | `create`, `list`, `describe`, `update`, `delete` |
+| `bindings` | `create`, `list`, `describe`, `update`, `delete` |
 | `operations` | `list`, `describe` |
 
 ### Service Creation Flags
@@ -238,6 +272,10 @@ All commands support `--location` (required) and `--project` (optional).
 | "Search for agents by skill name model" | `gcloud alpha agent-registry agents search --location=us-central1 --search-string="skills.name:model"` |
 | "Search for agents with display name containing Assessor" | `gcloud alpha agent-registry agents search --location=us-central1 --search-string="displayName:Assessor*"` |
 | "Search for MCP servers containing the display name GitHub" | `gcloud alpha agent-registry mcp-servers search --location=us-central1 --search-string="displayName:GitHub*"` |
+| "Create a binding between agent A and server B" | `gcloud alpha agent-registry bindings create my-binding --source-identifier="URN_A" --target-identifier="URN_B" --location=us-central1` |
+| "List all bindings" | `gcloud alpha agent-registry bindings list --location=us-central1` |
+| "Show details for binding X" | `gcloud alpha agent-registry bindings describe X --location=us-central1` |
+| "Delete binding Y" | `gcloud alpha agent-registry bindings delete Y --location=us-central1` |
 
 ---
 

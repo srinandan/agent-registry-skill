@@ -31,6 +31,20 @@ The [Agent Registry](https://docs.cloud.google.com/agent-registry/overview) inte
 pip install google-adk
 ```
 
+### Optional Dependencies
+
+To use the full capabilities of the AgentRegistry integration, you may need to install additional extras depending on your use case:
+
+- **For A2A (Agent-to-Agent) Support**: If you plan to use `get_remote_a2a_agent` or interact with remote A2A-compliant agents, install the `a2a` extra:
+  ```bash
+  pip install "google-adk[a2a]"
+  ```
+
+- **For Agent Identity (GCP Auth Provider)**: If you need to use the `GcpAuthProvider` (e.g., when `get_mcp_toolset` automatically resolves authentication via IAM bindings for registered MCP servers), install the `agent-identity` extra:
+  ```bash
+  pip install "google-adk[agent-identity]"
+  ```
+
 ## Use with Agent
 
 The primary way to use the Agent Registry integration within an ADK agent is to dynamically fetch remote agents or toolsets using the AgentRegistry client.
@@ -83,7 +97,58 @@ main_agent = LlmAgent(
 )
 ```
 
-## Available Tools
+## Authentication for Google MCP Servers and Remote A2A Agents
+
+### Remote A2A Agents
+If you are connecting to a Google A2A agent, you need to pass an `httpx.AsyncClient` configured with Google authentication headers to the `get_remote_a2a_agent` method.
+
+Example:
+```python
+import httpx
+import google.auth
+from google.auth.transport.requests import Request
+
+class GoogleAuth(httpx.Auth):
+    def __init__(self):
+        self.creds, _ = google.auth.default()
+
+    def auth_flow(self, request):
+        if not self.creds.valid:
+            self.creds.refresh(Request())
+        request.headers["Authorization"] = f"Bearer {self.creds.token}"
+        yield request
+
+httpx_client = httpx.AsyncClient(auth=GoogleAuth(), timeout=httpx.Timeout(60.0))
+
+remote_agent = registry.get_remote_a2a_agent(
+    f"projects/{project_id}/locations/{location}/agents/YOUR_AGENT_ID",
+    httpx_client=httpx_client,
+)
+```
+
+### Google MCP Servers
+For Google MCP servers, authentication headers are automatically passed in. However, if automatic authentication is not working as expected, you can manually provide headers using the `header_provider` argument in the `AgentRegistry` constructor.
+
+Example:
+```python
+import google.auth
+from google.auth.transport.requests import Request
+from google.adk.integrations.agent_registry import AgentRegistry
+
+def google_auth_header_provider(context):
+    creds, _ = google.auth.default()
+    if not creds.valid:
+        creds.refresh(Request())
+    return {"Authorization": f"Bearer {creds.token}"}
+
+registry = AgentRegistry(
+    project_id=project_id,
+    location=location,
+    header_provider=google_auth_header_provider
+)
+```
+
+## API Reference
 
 The AgentRegistry class provides the following core methods:
 
