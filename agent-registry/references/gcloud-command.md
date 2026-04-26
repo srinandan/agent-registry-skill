@@ -25,6 +25,9 @@ GROUPS
      agents
         (ALPHA) Manage Agent resources.
 
+     bindings
+        (ALPHA) Manage Binding resources.
+
      endpoints
         (ALPHA) Manage Endpoint resources.
 
@@ -140,6 +143,42 @@ OPTIONAL FLAGS
             Search for a keyword across all searchable fields.
 ```
 
+
+### bindings
+
+```text
+NAME
+    gcloud alpha agent-registry bindings - manage Binding resources
+
+SYNOPSIS
+    gcloud alpha agent-registry bindings COMMAND [GCLOUD_WIDE_FLAG ...]
+
+DESCRIPTION
+    (ALPHA) Manage Binding resources.
+
+GCLOUD WIDE FLAGS
+    These flags are available to all commands: --help.
+
+    Run $ gcloud help for details.
+
+COMMANDS
+    COMMAND is one of the following:
+
+     create
+        (ALPHA) Create bindings.
+
+     delete
+        (ALPHA) Delete bindings.
+
+     describe
+        (ALPHA) Describe bindings.
+
+     list
+        (ALPHA) List bindings.
+
+     update
+        (ALPHA) Update bindings.
+```
 
 ### endpoints
 
