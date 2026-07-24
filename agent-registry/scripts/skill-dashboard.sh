@@ -26,11 +26,6 @@ if [ -z "$PROJECT" ]; then
   exit 1
 fi
 
-# Default location to us-central1 if not set
-if [ -z "$LOCATION" ]; then
-  LOCATION="us-central1"
-fi
-
 echo "Fetching skills for project: $PROJECT..." >&2
 
 # Fetch global skills
@@ -39,10 +34,18 @@ if [ $? -ne 0 ] || [ -z "$GLOBAL_SKILLS" ]; then
   GLOBAL_SKILLS="[]"
 fi
 
-# Fetch regional skills
-REGIONAL_SKILLS=$(gcloud alpha agent-registry skills list --location="$LOCATION" --project="$PROJECT" --format=json --quiet 2>/dev/null)
-if [ $? -ne 0 ] || [ -z "$REGIONAL_SKILLS" ]; then
-  REGIONAL_SKILLS="[]"
+# Skills only work in "global", "us", or "eu" regions.
+# If LOCATION is not "us" or "eu" (and not "global"), do not pass it to gcloud.
+REGIONAL_SKILLS="[]"
+if [ -n "$LOCATION" ] && [ "$LOCATION" != "global" ]; then
+  if [ "$LOCATION" = "us" ] || [ "$LOCATION" = "eu" ]; then
+    REGIONAL_SKILLS=$(gcloud alpha agent-registry skills list --location="$LOCATION" --project="$PROJECT" --format=json --quiet 2>/dev/null)
+    if [ $? -ne 0 ] || [ -z "$REGIONAL_SKILLS" ]; then
+      REGIONAL_SKILLS="[]"
+    fi
+  else
+    echo "Warning: Skills only work in 'global', 'us', or 'eu' regions. Ignoring unsupported region '$LOCATION'." >&2
+  fi
 fi
 
 # Combine and format
