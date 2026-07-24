@@ -34,13 +34,13 @@ fi
 echo "Fetching agents for project: $PROJECT..." >&2
 
 # Fetch global agents
-GLOBAL_AGENTS=$(gcloud alpha agent-registry agents list --location=global --project="$PROJECT" --format=json --quiet 2>/dev/null)
+GLOBAL_AGENTS=$(gcloud agent-registry agents list --location=global --project="$PROJECT" --format=json --quiet 2>/dev/null)
 if [ $? -ne 0 ] || [ -z "$GLOBAL_AGENTS" ]; then
   GLOBAL_AGENTS="[]"
 fi
 
 # Fetch regional agents
-REGIONAL_AGENTS=$(gcloud alpha agent-registry agents list --location="$LOCATION" --project="$PROJECT" --format=json --quiet 2>/dev/null)
+REGIONAL_AGENTS=$(gcloud agent-registry agents list --location="$LOCATION" --project="$PROJECT" --format=json --quiet 2>/dev/null)
 if [ $? -ne 0 ] || [ -z "$REGIONAL_AGENTS" ]; then
   REGIONAL_AGENTS="[]"
 fi

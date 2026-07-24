@@ -4,16 +4,17 @@
 [![Release](https://img.shields.io/github/v/release/srinandan/agent-registry-skill)](https://github.com/srinandan/agent-registry-skill/releases)
 [![License](https://img.shields.io/github/license/srinandan/agent-registry-skill)](LICENSE)
 
-A skill for the Gemini CLI and AI agents to interact with Google Cloud's Agent Registry using `gcloud alpha agent-registry` commands.
+A skill for the Gemini CLI and AI agents to interact with Google Cloud's Agent Registry using `gcloud agent-registry` commands (and `gcloud alpha agent-registry skills` for Skills).
 
 ## Features
 
 - **Automated Authentication**: Helps with `gcloud auth login` and project configuration.
-- **Resource Management**: Create, list, describe, and delete Agents, MCP Servers, and Endpoints.
+- **Resource Management**: Create, list, describe, and delete Agents, MCP Servers, Endpoints, Services, Bindings, and Skills (Alpha).
 - **Smart Approvals**: Executes read-only commands (`list`, `describe`) immediately, while requesting approval for mutating commands (`create`, `update`, `delete`).
 - **Rich Examples**: Built-in support for registering common resources like GitHub MCP Servers, Salesforce Agents, and Vertex AI Model Garden endpoints.
 - **Python ADK Integration**: Specialized support and snippets for the Google Agent Development Kit (ADK).
 - **GKE Based Agents**: Support for configuring Kubernetes Deployments to act as Agents or MCP Servers.
+- **Skills Management**: Built-in support for exploring and managing Skills and Skill Revisions using `gcloud alpha agent-registry skills`.
 
 ## Installation
 

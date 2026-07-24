@@ -1,18 +1,18 @@
-# gcloud alpha agent-registry Documentation
+# gcloud agent-registry Documentation
 
-Documentation for `gcloud alpha agent-registry` and its subcommands.
+Documentation for `gcloud agent-registry` (GA) and `gcloud alpha agent-registry skills` (Alpha).
 
-## Main Command: `gcloud alpha agent-registry`
+## Main Command: `gcloud agent-registry`
 
 ```text
 NAME
-    gcloud alpha agent-registry - manage Agent Registry resources
+    gcloud agent-registry - manage Agent Registry resources
 
 SYNOPSIS
-    gcloud alpha agent-registry GROUP [GCLOUD_WIDE_FLAG ...]
+    gcloud agent-registry GROUP [GCLOUD_WIDE_FLAG ...]
 
 DESCRIPTION
-    (ALPHA) Manage Agent Registry resources.
+    Manage Agent Registry resources.
 
 GCLOUD WIDE FLAGS
     These flags are available to all commands: --help.
@@ -23,28 +23,27 @@ GROUPS
     GROUP is one of the following:
 
      agents
-        (ALPHA) Manage Agent resources.
+        Manage Agent resources.
 
      bindings
-        (ALPHA) Manage Binding resources.
+        Manage Binding resources.
 
      endpoints
-        (ALPHA) Manage Endpoint resources.
+        Manage Endpoint resources.
 
      mcp-servers
-        (ALPHA) Manage Mcp Server resources.
+        Manage Mcp Server resources.
 
      operations
-        (ALPHA) Manage Operation resources.
+        Manage Operation resources.
 
      services
-        (ALPHA) Manage Service resources.
+        Manage Service resources.
 
 NOTES
-    This command is currently in alpha and might change without notice. If this
-    command fails with API permission errors despite specifying the correct
-    project, you might be trying to access an API with an invitation-only early
-    access allowlist.
+    This variant is also available:
+
+        $ gcloud alpha agent-registry
 ```
 
 ---
@@ -55,10 +54,10 @@ NOTES
 
 ```text
 NAME
-    gcloud alpha agent-registry agents - manage Agent resources
+    gcloud agent-registry agents - manage Agent resources
 
 SYNOPSIS
-    gcloud alpha agent-registry agents COMMAND [GCLOUD_WIDE_FLAG ...]
+    gcloud agent-registry agents COMMAND [GCLOUD_WIDE_FLAG ...]
 
 DESCRIPTION
     (ALPHA) Manage Agent resources.
@@ -92,10 +91,10 @@ NOTES
 
 ```text
 NAME
-    gcloud alpha agent-registry agents search - search agents
+    gcloud agent-registry agents search - search agents
 
 SYNOPSIS
-    gcloud alpha agent-registry agents search --location=LOCATION
+    gcloud agent-registry agents search --location=LOCATION
         [--search-string=SEARCH_STRING] [--search-type=SEARCH_TYPE]
         [GCLOUD_WIDE_FLAG ...]
 
@@ -105,7 +104,7 @@ DESCRIPTION
 EXAMPLES
     To search all agents, run:
 
-        $ gcloud alpha agent-registry agents search
+        $ gcloud agent-registry agents search
 
 REQUIRED FLAGS
      Location resource - Parent value for SearchAgentsRequest This represents a
@@ -148,10 +147,10 @@ OPTIONAL FLAGS
 
 ```text
 NAME
-    gcloud alpha agent-registry bindings - manage Binding resources
+    gcloud agent-registry bindings - manage Binding resources
 
 SYNOPSIS
-    gcloud alpha agent-registry bindings COMMAND [GCLOUD_WIDE_FLAG ...]
+    gcloud agent-registry bindings COMMAND [GCLOUD_WIDE_FLAG ...]
 
 DESCRIPTION
     (ALPHA) Manage Binding resources.
@@ -184,10 +183,10 @@ COMMANDS
 
 ```text
 NAME
-    gcloud alpha agent-registry endpoints - manage Endpoint resources
+    gcloud agent-registry endpoints - manage Endpoint resources
 
 SYNOPSIS
-    gcloud alpha agent-registry endpoints COMMAND [GCLOUD_WIDE_FLAG ...]
+    gcloud agent-registry endpoints COMMAND [GCLOUD_WIDE_FLAG ...]
 
 DESCRIPTION
     (ALPHA) Manage Endpoint resources.
@@ -217,10 +216,10 @@ NOTES
 
 ```text
 NAME
-    gcloud alpha agent-registry mcp-servers - manage Mcp Server resources
+    gcloud agent-registry mcp-servers - manage Mcp Server resources
 
 SYNOPSIS
-    gcloud alpha agent-registry mcp-servers COMMAND [GCLOUD_WIDE_FLAG ...]
+    gcloud agent-registry mcp-servers COMMAND [GCLOUD_WIDE_FLAG ...]
 
 DESCRIPTION
     (ALPHA) Manage Mcp Server resources.
@@ -254,10 +253,10 @@ NOTES
 
 ```text
 NAME
-    gcloud alpha agent-registry mcp-servers search - search MCP servers
+    gcloud agent-registry mcp-servers search - search MCP servers
 
 SYNOPSIS
-    gcloud alpha agent-registry mcp-servers search --location=LOCATION
+    gcloud agent-registry mcp-servers search --location=LOCATION
         [--search-string=SEARCH_STRING] [--search-type=SEARCH_TYPE]
         [GCLOUD_WIDE_FLAG ...]
 
@@ -267,7 +266,7 @@ DESCRIPTION
 EXAMPLES
     To search all MCP servers, run:
 
-        $ gcloud alpha agent-registry mcp-servers search
+        $ gcloud agent-registry mcp-servers search
 
 REQUIRED FLAGS
      Location resource - Parent value for SearchMcpServersRequest This represents a
@@ -293,10 +292,10 @@ OPTIONAL FLAGS
 
 ```text
 NAME
-    gcloud alpha agent-registry operations - manage Operation resources
+    gcloud agent-registry operations - manage Operation resources
 
 SYNOPSIS
-    gcloud alpha agent-registry operations [GCLOUD_WIDE_FLAG ...]
+    gcloud agent-registry operations [GCLOUD_WIDE_FLAG ...]
 
 DESCRIPTION
     (ALPHA) Manage Operation resources.
@@ -320,10 +319,10 @@ NOTES
 
 ```text
 NAME
-    gcloud alpha agent-registry services - manage Service resources
+    gcloud agent-registry services - manage Service resources
 
 SYNOPSIS
-    gcloud alpha agent-registry services COMMAND [GCLOUD_WIDE_FLAG ...]
+    gcloud agent-registry services COMMAND [GCLOUD_WIDE_FLAG ...]
 
 DESCRIPTION
     (ALPHA) Manage Service resources.
@@ -352,8 +351,128 @@ COMMANDS
         (ALPHA) Update services.
 
 NOTES
+    If this command fails with API permission errors despite specifying the correct
+    project, you might be trying to access an API with an invitation-only early
+    access allowlist.
+```
+
+---
+
+### skills (Alpha)
+
+```text
+NAME
+    gcloud alpha agent-registry skills - manage Skill resources
+
+SYNOPSIS
+    gcloud alpha agent-registry skills GROUP | COMMAND [GCLOUD_WIDE_FLAG ...]
+
+DESCRIPTION
+    (ALPHA) Manage Skill resources.
+
+GCLOUD WIDE FLAGS
+    These flags are available to all commands: --help.
+
+    Run $ gcloud help for details.
+
+GROUPS
+    GROUP is one of the following:
+
+     revisions
+        (ALPHA) Manage Skill Revision resources.
+
+COMMANDS
+    COMMAND is one of the following:
+
+     create
+        (ALPHA) Create skills.
+
+     delete
+        (ALPHA) Delete skills.
+
+     describe
+        (ALPHA) Describe skills.
+
+     list
+        (ALPHA) List skills.
+
+     search
+        (ALPHA) search skills.
+
+     update
+        (ALPHA) Update skills.
+
+NOTES
     This command is currently in alpha and might change without notice. If this
     command fails with API permission errors despite specifying the correct
     project, you might be trying to access an API with an invitation-only early
     access allowlist.
+```
+
+#### `create`
+
+```text
+NAME
+    gcloud alpha agent-registry skills create - create skills
+
+SYNOPSIS
+    gcloud alpha agent-registry skills create SKILL [--async]
+        [--default-revision=DEFAULT_REVISION] [--description=DESCRIPTION]
+        [--display-name=DISPLAY_NAME] [--location=LOCATION]
+        [--publisher=PUBLISHER] [--request-id=REQUEST_ID]
+        [--target-state=TARGET_STATE] [--type=TYPE]
+        [--initial-revision-name=INITIAL_REVISION_NAME --payload=PAYLOAD
+          | [--gcs-source-uri=GCS_SOURCE_URI
+          : --gcs-source-generation=GCS_SOURCE_GENERATION]]
+        [GCLOUD_WIDE_FLAG ...]
+
+DESCRIPTION
+    (ALPHA) Create a skill
+```
+
+#### `search`
+
+```text
+NAME
+    gcloud alpha agent-registry skills search - search skills
+
+SYNOPSIS
+    gcloud alpha agent-registry skills search --location=LOCATION
+        [--query=QUERY] [--search-type=SEARCH_TYPE] [--filter=EXPRESSION]
+        [--limit=LIMIT] [--page-size=PAGE_SIZE] [--sort-by=[FIELD,...]]
+        [GCLOUD_WIDE_FLAG ...]
+
+DESCRIPTION
+    (ALPHA) search skills
+```
+
+#### `revisions`
+
+```text
+NAME
+    gcloud alpha agent-registry skills revisions - manage Skill Revision resources
+
+SYNOPSIS
+    gcloud alpha agent-registry skills revisions COMMAND [GCLOUD_WIDE_FLAG ...]
+
+DESCRIPTION
+    (ALPHA) Manage Skill Revision resources.
+
+COMMANDS
+    COMMAND is one of the following:
+
+     create
+        (ALPHA) Create skillRevisions.
+
+     delete
+        (ALPHA) Delete skillRevisions.
+
+     describe
+        (ALPHA) Describe skillRevisions.
+
+     download
+        (ALPHA) Download the payload of a Skill Revision.
+
+     list
+        (ALPHA) List skillRevisions.
 ```

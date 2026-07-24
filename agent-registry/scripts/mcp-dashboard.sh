@@ -34,13 +34,13 @@ fi
 echo "Fetching MCP servers for project: $PROJECT..." >&2
 
 # Fetch global MCP servers
-GLOBAL_MCP=$(gcloud alpha agent-registry mcp-servers list --location=global --project="$PROJECT" --format=json --quiet 2>/dev/null)
+GLOBAL_MCP=$(gcloud agent-registry mcp-servers list --location=global --project="$PROJECT" --format=json --quiet 2>/dev/null)
 if [ $? -ne 0 ] || [ -z "$GLOBAL_MCP" ]; then
   GLOBAL_MCP="[]"
 fi
 
 # Fetch regional MCP servers
-REGIONAL_MCP=$(gcloud alpha agent-registry mcp-servers list --location="$LOCATION" --project="$PROJECT" --format=json --quiet 2>/dev/null)
+REGIONAL_MCP=$(gcloud agent-registry mcp-servers list --location="$LOCATION" --project="$PROJECT" --format=json --quiet 2>/dev/null)
 if [ $? -ne 0 ] || [ -z "$REGIONAL_MCP" ]; then
   REGIONAL_MCP="[]"
 fi
