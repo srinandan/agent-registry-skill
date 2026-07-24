@@ -168,6 +168,6 @@ The AgentRegistry constructor accepts the following arguments:
 - `header_provider` (Callable, optional): A callable that takes a ReadonlyContext and returns a dictionary of custom headers to be included in requests made by the [McpToolset](https://google.github.io/adk-docs/tools-custom/mcp-tools/#mcptoolset-class) or [RemoteA2aAgent](https://google.github.io/adk-docs/a2a/quickstart-consuming-go/#quickstart-consuming-a-remote-agent-via-a2a) to the target services. This does not affect headers used to call the Agent Registry API itself.
 
 ## Additional resources
-- [Sample Agent Code](https://github.com/google/adk-python/tree/main/contributing/samples/agent_registry_agent)
+- [Sample Agent Code](https://adk.dev/integrations/agent-registry)
 - [Agent Registry Client](https://github.com/google/adk-python/blob/main/src/google/adk/integrations/agent_registry/agent_registry.py)
 - [Google Auth Library](https://google-auth.readthedocs.io/en/latest/)
