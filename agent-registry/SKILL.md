@@ -184,16 +184,19 @@ gcloud agent-registry bindings delete BINDING_NAME --location=us-central1
 ### 6. Skills (Alpha)
 Used to manage reusable AI Skills and Skill Revisions.
 
+> [!IMPORTANT]
+> **Supported Locations for Skills:** Skills only work in `"global"`, `"us"`, or `"eu"` regions. If the user asks for something else (e.g. `us-central1`), **do not pass that region to the `gcloud` command**. Instead, inform the user that Skills are only supported in `global`, `us`, or `eu` regions and ask them to select one of those locations.
+
 > [!NOTE]
 > The **Skills** feature is currently in **alpha** and must be executed via `gcloud alpha agent-registry skills`. Skills are not available through MCP.
 
 ```bash
 # List Skills
-gcloud alpha agent-registry skills list --location=us-central1
+gcloud alpha agent-registry skills list --location=us
 
 # Create a Skill from local payload ZIP archive
 gcloud alpha agent-registry skills create my-skill \
-  --location=us-central1 \
+  --location=us \
   --display-name="My Custom Skill" \
   --description="Skill description" \
   --type=simple \
@@ -201,29 +204,29 @@ gcloud alpha agent-registry skills create my-skill \
 
 # Create a Skill from Cloud Storage object
 gcloud alpha agent-registry skills create my-skill \
-  --location=us-central1 \
+  --location=us \
   --display-name="My Custom Skill" \
   --gcs-source-uri=gs://my-bucket/skill.zip
 
 # Describe a Skill
-gcloud alpha agent-registry skills describe my-skill --location=us-central1
+gcloud alpha agent-registry skills describe my-skill --location=us
 
 # Search Skills
-gcloud alpha agent-registry skills search --location=us-central1 \
+gcloud alpha agent-registry skills search --location=us \
   --query="weather" --search-type=keyword
 
 # Update a Skill
 gcloud alpha agent-registry skills update my-skill \
-  --location=us-central1 \
+  --location=us \
   --display-name="Updated Skill Name"
 
 # Delete a Skill
-gcloud alpha agent-registry skills delete my-skill --location=us-central1
+gcloud alpha agent-registry skills delete my-skill --location=us
 
 # Manage Skill Revisions (Alpha)
-gcloud alpha agent-registry skills revisions list --location=us-central1
-gcloud alpha agent-registry skills revisions describe REVISION_ID --location=us-central1
-gcloud alpha agent-registry skills revisions download REVISION_ID --location=us-central1
+gcloud alpha agent-registry skills revisions list --location=us
+gcloud alpha agent-registry skills revisions describe REVISION_ID --location=us
+gcloud alpha agent-registry skills revisions download REVISION_ID --location=us
 ```
 
 ## Agent Dashboard
@@ -340,9 +343,9 @@ All commands support `--location` (required) and `--project` (optional).
 | "List all bindings" | `gcloud agent-registry bindings list --location=us-central1` |
 | "Show details for binding X" | `gcloud agent-registry bindings describe X --location=us-central1` |
 | "Delete binding Y" | `gcloud agent-registry bindings delete Y --location=us-central1` |
-| "List all skills" | `gcloud alpha agent-registry skills list --location=us-central1` |
-| "Show details of skill my-skill" | `gcloud alpha agent-registry skills describe my-skill --location=us-central1` |
-| "Search skills matching query" | `gcloud alpha agent-registry skills search --location=us-central1 --query="QUERY"` |
+| "List all skills" | `gcloud alpha agent-registry skills list --location=us` |
+| "Show details of skill my-skill" | `gcloud alpha agent-registry skills describe my-skill --location=us` |
+| "Search skills matching query" | `gcloud alpha agent-registry skills search --location=us --query="QUERY"` |
 
 ---
 
@@ -473,7 +476,7 @@ gcloud agent-registry mcp-servers search --location=us-east4 \
 ## Searching Skills (Alpha)
 
 > [!NOTE]
-> Skills are not yet available through MCP. To search for Skills, run the `gcloud alpha agent-registry skills search` CLI command.
+> Skills are not yet available through MCP. To search for Skills, run the `gcloud alpha agent-registry skills search` CLI command. **Remember:** Skills only work in `"global"`, `"us"`, or `"eu"` regions.
 
 ### gcloud Usage
 
@@ -481,11 +484,11 @@ Search skills using keyword or semantic search:
 
 ```bash
 # Keyword search across searchable fields
-gcloud alpha agent-registry skills search --location=us-central1 \
+gcloud alpha agent-registry skills search --location=us \
   --query="weather" --search-type=keyword
 
 # Semantic search based on natural language query meaning
-gcloud alpha agent-registry skills search --location=us-central1 \
+gcloud alpha agent-registry skills search --location=us \
   --query="find skills that build documents" --search-type=semantic
 ```
 
@@ -510,7 +513,7 @@ For comprehensive details on how to build, deploy, or configure agents using Goo
 ## Interactive Prompts
 
 Only ask if still missing after checking session context:
-- **location**: "Which region? (e.g. `us-central1`)" — only if `compute/region` was not set
+- **location**: "Which region? (e.g. `us-central1`)" — only if `compute/region` was not set. **Note for Skills:** Skills only work in `"global"`, `"us"`, or `"eu"` regions. If the user asks for a Skill in any other region, **do not pass that region to the gcloud command**. Inform the user that Skills are only supported in `global`, `us`, or `eu` regions and ask them to select one of those options.
 - **project**: "Which project?" — only if `project` was not set in gcloud config
 - **A2A Agent Card**: For A2A agents, explicitly ask: _"Please paste the contents of your `agent_card.json` file."_ and use it for `--agent-spec-content`.
 - **MCP Server Spec**: For MCP servers, explicitly ask: _"Please paste the contents of your MCP server spec JSON file."_ and use it for `--mcp-server-spec-content`.
