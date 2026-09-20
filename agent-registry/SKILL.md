@@ -116,6 +116,39 @@ gcloud agent-registry agents list --location=us-central1
 gcloud agent-registry agents list --location=global
 ```
 
+#### Registering a Global Service from an Existing Regional Resource (`agentRegistryReference`)
+
+To create a `Service` in the `global` location that references an existing regional `Agent`, `McpServer`, or `Endpoint` (for example, in `us-central1`), call the `v1alpha` REST API directly with `curl`. The `gcloud` CLI does not yet expose a flag for `agentRegistryReference`.
+
+> [!IMPORTANT]
+> **Supported Location:** Creating a service via `agentRegistryReference` **only works in the `global` region** (`projects/{project}/locations/global/services`). Do not attempt to create reference services in regional locations.
+
+**Required Constraints:**
+1. **Use an ADC Token:** Obtain the bearer token using `gcloud auth application-default print-access-token`. Do not use `gcloud auth print-access-token` (it returns a CBA-bound token that fails with `401 ACCESS_TOKEN_TYPE_UNSUPPORTED` on `agentregistry.googleapis.com`).
+2. **Use the Numeric Project Number in `resourceTarget`:** The `agentRegistryReference.resourceTarget` field requires the **numeric project number** (e.g., `projects/432423772502/locations/us-central1/agents/agentregistry-...`), not the alphanumeric project ID. Resolve the project number via `gcloud projects describe PROJECT_ID --format="value(projectNumber)"`.
+
+```bash
+# 1. Resolve the numeric project number and ADC access token
+PROJECT_ID=$(gcloud config get-value project)
+PROJECT_NUMBER=$(gcloud projects describe "${PROJECT_ID}" --format="value(projectNumber)")
+TOKEN=$(gcloud auth application-default print-access-token)
+
+# 2. Create the Service in global pointing to the regional resource
+curl -X POST "https://agentregistry.googleapis.com/v1alpha/projects/${PROJECT_ID}/locations/global/services?serviceId=SERVICE_ID" \
+  -H "Authorization: Bearer ${TOKEN}" \
+  -H "Content-Type: application/json" \
+  -H "X-Goog-User-Project: ${PROJECT_ID}" \
+  -d "{
+    \"displayName\": \"DISPLAY_NAME\",
+    \"description\": \"DESCRIPTION\",
+    \"agentRegistryReference\": {
+      \"resourceTarget\": \"projects/${PROJECT_NUMBER}/locations/us-central1/agents/AGENT_ID\"
+    }
+  }"
+```
+
+When the long-running operation completes, the `Service` output field `registryResource` contains the newly materialized `global` resource name (`projects/{project_number}/locations/global/agents/{global_agent_id}`), which preserves the URN `agentId` and invokable interfaces of the referenced regional resource.
+
 ### 3. Endpoints
 Used to register service endpoints (e.g., Vertex AI models).
 
@@ -346,6 +379,7 @@ All commands support `--location` (required) and `--project` (optional).
 | "List all skills" | `gcloud alpha agent-registry skills list --location=us` |
 | "Show details of skill my-skill" | `gcloud alpha agent-registry skills describe my-skill --location=us` |
 | "Search skills matching query" | `gcloud alpha agent-registry skills search --location=us --query="QUERY"` |
+| "Create a service in global pointing to regional agent X" | `curl -X POST "https://agentregistry.googleapis.com/v1alpha/projects/PROJECT_ID/locations/global/services?serviceId=SERVICE_ID" ... -d '{"agentRegistryReference": {"resourceTarget": "projects/PROJECT_NUMBER/locations/us-central1/agents/X"}}'` |
 
 ---
 
