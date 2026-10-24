@@ -179,42 +179,41 @@ def evaluate_with_llm_judge(
     api_key: str,
     model: str = DEFAULT_MODEL,
     print_detailed_results: bool = True,
+    max_workers: int = 4,
 ) -> EvalRunResult:
     """Runs each EvalSet case through a doc-only Gemini agent and grades with an LLM-as-a-judge rubric."""
+    from concurrent.futures import ThreadPoolExecutor
+
     from google import genai
     from google.genai import types
 
     client = genai.Client(api_key=api_key)
-    case_results: list[EvalCaseResult] = []
-    passed_count = 0
-    total_score = 0.0
+    sys_instruction = (
+        "You are an AI assistant being evaluated in a single-turn benchmark using ONLY the following skill documentation. "
+        "Follow its instructions, best practices, interactive prompts, and command syntax strictly. "
+        "Because this is a single-turn evaluation: "
+        "(1) Always include all complete CLI commands and/or MCP tool calls needed to fulfill every part of the user's request in a single response "
+        "(using placeholders like PASTE_MCP_SPEC_JSON_HERE, PASTE_AGENT_CARD_JSON_HERE, or <PROJECT_NUMBER> when a file payload or project number lookup is needed), "
+        "(2) Include any required interactive questions, parameter requests, best-practice guardrails, and user approval prompts ('Ready to run this command? (yes/no)') alongside the complete commands.\n\n"
+        f"{full_skill_doc}"
+    )
 
-    for case in eval_set.eval_cases:
+    def _eval_single_case(case) -> EvalCaseResult:
         case_id = case.eval_id
         inv = case.conversation[0]
         user_prompt = inv.user_content.parts[0].text or ""
         expected_rubric = inv.final_response.parts[0].text or ""
 
-        # Step 1: Candidate response using ONLY the skill documentation
         candidate_resp = client.models.generate_content(
             model=model,
             contents=user_prompt,
             config=types.GenerateContentConfig(
-                system_instruction=(
-                    "You are an AI assistant being evaluated in a single-turn benchmark using ONLY the following skill documentation. "
-                    "Follow its instructions, best practices, interactive prompts, and command syntax strictly. "
-                    "Because this is a single-turn evaluation: "
-                    "(1) Always include all complete CLI commands and/or MCP tool calls needed to fulfill every part of the user's request in a single response "
-                    "(using placeholders like PASTE_MCP_SPEC_JSON_HERE, PASTE_AGENT_CARD_JSON_HERE, or <PROJECT_NUMBER> when a file payload or project number lookup is needed), "
-                    "(2) Include any required interactive questions, parameter requests, best-practice guardrails, and user approval prompts ('Ready to run this command? (yes/no)') alongside the complete commands.\n\n"
-                    f"{full_skill_doc}"
-                ),
+                system_instruction=sys_instruction,
                 temperature=0.0,
             ),
         )
         candidate_text = candidate_resp.text or ""
 
-        # Step 2: LLM-as-a-Judge evaluation against ground-truth expectation
         judge_prompt = (
             "You are an expert evaluator grading an AI agent's response to a user prompt based on a ground-truth rubric.\n\n"
             f"### User Prompt\n{user_prompt}\n\n"
@@ -247,24 +246,25 @@ def evaluate_with_llm_judge(
         score = float(verdict.get("score", 1.0 if verdict.get("passed") else 0.0))
         passed = bool(verdict.get("passed", score >= 0.75))
         reason = str(verdict.get("reason", ""))
-
         status = "PASS" if passed else "FAIL"
-        if passed:
-            passed_count += 1
-        total_score += score
 
-        case_results.append(
-            EvalCaseResult(
-                case_id=case_id,
-                status=status,
-                score=score,
-                mode="llm_judge",
-                reason=reason,
-            )
+        return EvalCaseResult(
+            case_id=case_id,
+            status=status,
+            score=score,
+            mode="llm_judge",
+            reason=reason,
         )
-        if print_detailed_results:
-            badge = "✅" if passed else "❌"
-            print(f"  {badge} [{case_id}] score={score:.2f} - {reason}")
+
+    with ThreadPoolExecutor(max_workers=max_workers) as pool:
+        case_results = list(pool.map(_eval_single_case, eval_set.eval_cases))
+
+    passed_count = sum(1 for r in case_results if r.status == "PASS")
+    total_score = sum(r.score or 0.0 for r in case_results)
+    if print_detailed_results:
+        for r in case_results:
+            badge = "✅" if r.status == "PASS" else "❌"
+            print(f"  {badge} [{r.case_id}] score={(r.score or 0.0):.2f} - {r.reason}")
 
     total = len(eval_set.eval_cases)
     avg_score = (total_score / total) if total > 0 else 0.0

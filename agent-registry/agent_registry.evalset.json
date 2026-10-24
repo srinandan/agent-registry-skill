@@ -108,7 +108,7 @@
           "finalResponse": {
             "parts": [
               {
-                "text": "Filters by substring matching on `mcpServerId` using `gcloud agent-registry mcp-servers list --location=us-central1 --filter=\"mcpServerId:run\"`."
+                "text": "Matches `mcpServerId:run` using `gcloud agent-registry mcp-servers list --location=us-central1 --filter=\"mcpServerId:run\"` or `gcloud agent-registry mcp-servers search --location=us-central1 --search-string=\"mcpServerId:run\"` (or `mcp_agentregistry_search_mcp_servers`)."
               }
             ]
           },
