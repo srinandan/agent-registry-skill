@@ -62,7 +62,14 @@ def _extract_anchor_tokens(expected_text: str) -> list[str]:
     anchors: list[str] = []
     for span in spans:
         token = span.strip().split()[0] if span.strip() else ""
-        if token in ("gcloud", "./scripts/annotate_gke.py", "./scripts/agent-dashboard.sh", "./scripts/mcp-dashboard.sh", "./scripts/skill-dashboard.sh"):
+        if token in (
+            "gcloud",
+            "./scripts/annotate_gke.py",
+            "./scripts/agent-dashboard.sh",
+            "./scripts/mcp-dashboard.sh",
+            "./scripts/skill-dashboard.sh",
+            "./scripts/quick-add-gcp-service.sh",
+        ):
             anchors.append(token)
         elif token.startswith("--") and "=" in token:
             anchors.append(token.split("=")[0])

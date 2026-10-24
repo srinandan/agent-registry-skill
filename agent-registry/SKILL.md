@@ -6,6 +6,7 @@ description: >
   "mcp-servers", "gcloud agents", "register an agent", "list agents", "create a service",
   "agent service", "ai applications", "ai-applications", "ai apps", "default ai application",
   "set-iam-policy", "get-iam-policy", "add-iam-policy-binding", "remove-iam-policy-binding",
+  "quick add", "quick-add", "gcp service", "5 endpoints", "agent gateway", "rep.googleapis.com",
   "management boundary", "boundary", "boundary-configs", "boundaries",
   "capability-configs", "capability config", "management project", or any request to
   manage agents, MCP servers, endpoints, services, bindings, skills, AI applications,
@@ -146,6 +147,78 @@ gcloud agent-registry services update gemini-models \
   --display-name="Model Garden on Vertex AI" \
   --location=us-central1
 ```
+
+#### Quick Add GCP Service (5-Variant Endpoint Registration for Agent Gateway)
+
+When an autonomous agent runs behind a governed **Agent Gateway** (which intercepts HTTP egress with a default-deny policy), Google Cloud Client SDKs dynamically resolve endpoints at runtime across global, regional, mTLS, and Regional Endpoint (REP) hostname variants. Registering only a single URL causes runtime calls to the other variants to be blocked.
+
+##### API Classification Taxonomy (Which APIs Need Registration?)
+
+Before registering a Google Cloud API for Agent Gateway egress, check which bucket it belongs to:
+
+| Category | Included Services & APIs | Gateway Policy | Agent Registry Requirement | Access Control |
+|----------|--------------------------|----------------|----------------------------|----------------|
+| **System APIs** | Cloud Resource Manager (`cloudresourcemanager.googleapis.com`), Runtime Host Metadata | **Unconditionally Allowed** | **None** (Do not register) | Managed implicitly by Agent Runtime infrastructure |
+| **Platform APIs** | Cloud Logging (`logging.googleapis.com`), Cloud Monitoring (`monitoring.googleapis.com`), Cloud Trace (`trace.googleapis.com`), Telemetry (`telemetry.googleapis.com`), OAuth2 (`oauth2.googleapis.com`), IAP (`iap.googleapis.com`), Agent Registry (`agentregistry.googleapis.com`) | **Unconditionally Allowed** | **None** (Do not register) | Standard GCP IAM roles on the Agent Service Account / Principal (e.g., `roles/logging.logWriter`) |
+| **Governed Target Services** | Vertex AI Platform (`aiplatform`), Discovery Engine (`discoveryengine`), Pub/Sub (`pubsub`), Cloud Storage (`storage`), Memorybank, Session Service, external MCP servers, custom REST endpoints | **Default Denied** | **Required** (Register all 5 URL variants below) | Agent Gateway Policy + IAP Egressor binding (`roles/iap.egressor`) on the Agent Identity |
+
+> [!TIP]
+> If a user asks whether they need to register a **System API** (`cloudresourcemanager`) or **Platform API** (`logging`, `monitoring`, `trace`, `telemetry`, `oauth2`, `iap`, `agentregistry`) in Agent Registry for Agent Gateway egress, inform them that System and Platform APIs are unconditionally permitted by the runtime/gateway and **do not** require an Agent Registry entry.
+
+##### Registering All 5 URL Variants for a Governed Target Service
+
+When a user wants to quickly add a Google Cloud API (such as `aiplatform`, `discoveryengine`, `pubsub`, or `storage`) in a region (`LOCATION`, e.g. `us-central1` or `us-east7`), use the bundled `./scripts/quick-add-gcp-service.sh` helper script or run the 5 `gcloud agent-registry services create` commands below (always previewing and asking for user approval before executing, since creating services mutates state):
+
+| # | Variant | Service ID | Display Name | Endpoint URL |
+|---|---------|------------|--------------|--------------|
+| 1 | **Base** | `${SERVICE_ID}` | `${SERVICE_ID}` | `https://${SERVICE_ID}.googleapis.com` |
+| 2 | **Base mTLS** | `${SERVICE_ID}-mtls` | `${SERVICE_ID} mTLS` | `https://${SERVICE_ID}.mtls.googleapis.com` |
+| 3 | **Locational** | `${LOCATION}-${SERVICE_ID}` | `${SERVICE_ID} Locational` | `https://${LOCATION}-${SERVICE_ID}.googleapis.com` |
+| 4 | **Locational mTLS** | `${LOCATION}-${SERVICE_ID}-mtls` | `${SERVICE_ID} Locational mTLS` | `https://${LOCATION}-${SERVICE_ID}.mtls.googleapis.com` |
+| 5 | **Regional REP** | `${SERVICE_ID}-${LOCATION}-rep` | `${SERVICE_ID} Regional (REP)` | `https://${SERVICE_ID}.${LOCATION}.rep.googleapis.com` |
+
+```bash
+# Option A: Use the bundled Quick Add helper script (registers all 5 URL variants)
+./scripts/quick-add-gcp-service.sh --service=aiplatform --location=us-central1 --project=PROJECT_ID
+
+# Option B: Equivalent explicit gcloud commands for all 5 URL variants
+SERVICE_ID="aiplatform"
+LOCATION="us-central1"
+PROJECT_ID="PROJECT_ID"
+
+# 1. Base
+gcloud agent-registry services create "${SERVICE_ID}" \
+  --project="${PROJECT_ID}" --location="${LOCATION}" \
+  --display-name="${SERVICE_ID}" --endpoint-spec-type=no-spec \
+  --interfaces='[{"protocolBinding": "jsonrpc", "url": "https://'"${SERVICE_ID}"'.googleapis.com"}]'
+
+# 2. Base mTLS
+gcloud agent-registry services create "${SERVICE_ID}-mtls" \
+  --project="${PROJECT_ID}" --location="${LOCATION}" \
+  --display-name="${SERVICE_ID} mTLS" --endpoint-spec-type=no-spec \
+  --interfaces='[{"protocolBinding": "jsonrpc", "url": "https://'"${SERVICE_ID}"'.mtls.googleapis.com"}]'
+
+# 3. Locational
+gcloud agent-registry services create "${LOCATION}-${SERVICE_ID}" \
+  --project="${PROJECT_ID}" --location="${LOCATION}" \
+  --display-name="${SERVICE_ID} Locational" --endpoint-spec-type=no-spec \
+  --interfaces='[{"protocolBinding": "jsonrpc", "url": "https://'"${LOCATION}-${SERVICE_ID}"'.googleapis.com"}]'
+
+# 4. Locational mTLS
+gcloud agent-registry services create "${LOCATION}-${SERVICE_ID}-mtls" \
+  --project="${PROJECT_ID}" --location="${LOCATION}" \
+  --display-name="${SERVICE_ID} Locational mTLS" --endpoint-spec-type=no-spec \
+  --interfaces='[{"protocolBinding": "jsonrpc", "url": "https://'"${LOCATION}-${SERVICE_ID}"'.mtls.googleapis.com"}]'
+
+# 5. Regional REP
+gcloud agent-registry services create "${SERVICE_ID}-${LOCATION}-rep" \
+  --project="${PROJECT_ID}" --location="${LOCATION}" \
+  --display-name="${SERVICE_ID} Regional (REP)" --endpoint-spec-type=no-spec \
+  --interfaces='[{"protocolBinding": "jsonrpc", "url": "https://'"${SERVICE_ID}.${LOCATION}"'.rep.googleapis.com"}]'
+```
+
+> [!IMPORTANT]
+> After registering the 5 endpoint variants for a Governed Target Service, remind the user to bind the **`roles/iap.egressor`** role to the Agent Identity so Agent Gateway permits egress traffic to those endpoints.
 
 ### 4. GKE Based Agents
 Used to configure Kubernetes deployments to be registered as an Agent or MCP Server. You can add the required `apphub.cloud.google.com/functional-type` annotation to YAML files using the provided python script.
@@ -699,6 +772,8 @@ All `gcloud agent-registry` commands support `--location` (required) and `--proj
 | "show me a dashboard for my mcp servers" | `./scripts/mcp-dashboard.sh` |
 | "show me a dashboard for my skills" | `./scripts/skill-dashboard.sh` |
 | "Change display name of gemini-models to 'Vertex AI Model Garden'" | `gcloud agent-registry services update gemini-models --display-name="..." --location=us-central1` |
+| "Quickly add the aiplatform GCP service in us-east7 (all 5 endpoints)" | `./scripts/quick-add-gcp-service.sh --service=aiplatform --location=us-east7` |
+| "Quick add pubsub API endpoints for Agent Gateway in us-central1" | `./scripts/quick-add-gcp-service.sh --service=pubsub --location=us-central1` |
 | "Which agents in us-central1 are based on reasoning engine?" | `gcloud agent-registry agents list --location=us-central1 --filter="attributes.\"agentregistry.googleapis.com/system/RuntimeReference\".uri:reasoningEngine"` |
 | "List all vertex ai agents" | `gcloud agent-registry agents list --location=us-central1 --filter="attributes.\"agentregistry.googleapis.com/system/RuntimeReference\".uri:reasoningEngine"` |
 | "Show agents with agent engine runtime" | `gcloud agent-registry agents list --location=us-central1 --filter="attributes.\"agentregistry.googleapis.com/system/RuntimeReference\".uri:reasoningEngine"` |
