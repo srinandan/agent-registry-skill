@@ -341,7 +341,7 @@
           "userContent": {
             "parts": [
               {
-                "text": "Register an endpoint called gemini-models in us-central1 for https://us-central1-aiplatform.googleapis.com/v1beta1/publishers/*/models and then update its display name to 'Model Garden on Vertex AI'."
+                "text": "Show me the commands to register an endpoint called gemini-models (with display name 'Vertex AI Model Garden') in us-central1 for https://us-central1-aiplatform.googleapis.com/v1beta1/publishers/*/models and then update its display name to 'Model Garden on Vertex AI'."
               }
             ]
           },
@@ -641,7 +641,7 @@
           "userContent": {
             "parts": [
               {
-                "text": "Create a capability config called agent-governance (display name 'Agent Governance Capability') under folder 849163983723 using my existing project ID agent-registry-demo-1 as the management project. Can I pass the project ID directly to --management-project?"
+                "text": "Create a capability config called agent-governance (display name 'Agent Governance Capability', type agent-management) under folder 849163983723 using my existing project ID agent-registry-demo-1 as the management project. Can I pass the project ID directly to --management-project?"
               }
             ]
           },
