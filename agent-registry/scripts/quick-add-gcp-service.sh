@@ -92,17 +92,6 @@ if [ -z "$LOCATION" ]; then
   LOCATION="us-central1"
 fi
 
-case "$SERVICE_ID" in
-  cloudresourcemanager)
-    echo "Note: '${SERVICE_ID}.googleapis.com' is a System API and is unconditionally allowed by Agent Runtime infrastructure. No Agent Registry entry is required."
-    exit 0
-    ;;
-  logging|monitoring|trace|telemetry|oauth2|iap|agentregistry)
-    echo "Note: '${SERVICE_ID}.googleapis.com' is a Platform API and is unconditionally allowed at the Agent Runtime / Gateway boundary (governed via standard GCP IAM roles on the Agent Service Account). No Agent Registry entry is required."
-    exit 0
-    ;;
-esac
-
 echo "Registering 5 endpoint URL variants for service '${SERVICE_ID}' in project '${PROJECT}' (${LOCATION})..."
 
 # 1. Base

@@ -152,24 +152,6 @@ gcloud agent-registry services update gemini-models \
 
 When an autonomous agent runs behind a governed **Agent Gateway** (which intercepts HTTP egress with a default-deny policy), Google Cloud Client SDKs dynamically resolve endpoints at runtime across global, regional, mTLS, and Regional Endpoint (REP) hostname variants. Registering only a single URL causes runtime calls to the other variants to be blocked.
 
-##### API Classification Taxonomy (Which APIs Need Registration?)
-
-Before registering a Google Cloud API for Agent Gateway egress, check which bucket it belongs to:
-
-| Category | Included Services & APIs | Gateway Policy | Agent Registry Requirement | Access Control |
-|----------|--------------------------|----------------|----------------------------|----------------|
-| **System APIs** | Cloud Resource Manager (`cloudresourcemanager.googleapis.com`), Runtime Host Metadata | **Unconditionally Allowed** | **None** (Do not register) | Managed implicitly by Agent Runtime infrastructure |
-| **Platform APIs** | Cloud Logging (`logging.googleapis.com`), Cloud Monitoring (`monitoring.googleapis.com`), Cloud Trace (`trace.googleapis.com`), Telemetry (`telemetry.googleapis.com`), OAuth2 (`oauth2.googleapis.com`), IAP (`iap.googleapis.com`), Agent Registry (`agentregistry.googleapis.com`) | **Unconditionally Allowed** | **None** (Do not register) | Standard GCP IAM roles on the Agent Service Account / Principal (e.g., `roles/logging.logWriter`) |
-| **Governed Target Services** | Vertex AI Platform (`aiplatform`), Discovery Engine (`discoveryengine`), Pub/Sub (`pubsub`), Cloud Storage (`storage`), Memorybank, Session Service, external MCP servers, custom REST endpoints | **Default Denied** | **Required** (Register all 5 URL variants below) | Agent Gateway Policy + IAP Egressor binding (`roles/iap.egressor`) on the Agent Identity |
-
-> [!TIP]
-> Whenever a user asks whether specific GCP APIs need to be registered in Agent Registry for Agent Gateway egress:
-> 1. Explicitly classify each API into its bucket (**System API**, **Platform API**, or **Governed Target Service**).
-> 2. Explain that **System APIs** (`cloudresourcemanager`) and **Platform APIs** (`logging`, `monitoring`, `trace`, `telemetry`, `oauth2`, `iap`, `agentregistry`) are **unconditionally allowed** by the runtime/gateway and **do not** require an Agent Registry entry (Platform APIs are governed via standard GCP IAM roles on the Agent Service Account).
-> 3. For any **Governed Target Service** mentioned (such as `aiplatform`, `discoveryengine`, `pubsub`, or `storage`), always show `./scripts/quick-add-gcp-service.sh --service=<SERVICE_ID> --location=<LOCATION>` (or the 5 `gcloud agent-registry services create` commands) and remind the user to bind **`roles/iap.egressor`** to the Agent Identity.
-
-##### Registering All 5 URL Variants for a Governed Target Service
-
 When a user wants to quickly add a Google Cloud API (such as `aiplatform`, `discoveryengine`, `pubsub`, or `storage`) in a region (`LOCATION`, e.g. `us-central1` or `us-east7`), use the bundled `./scripts/quick-add-gcp-service.sh` helper script or run the 5 `gcloud agent-registry services create` commands below (always previewing and asking for user approval before executing, since creating services mutates state):
 
 | # | Variant | Service ID | Display Name | Endpoint URL |
