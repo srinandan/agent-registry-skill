@@ -16,7 +16,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: srinandan
-  version: "0.8.0"
+  version: "0.8.1"
 ---
 
 # Google Cloud Agent Registry Skill
