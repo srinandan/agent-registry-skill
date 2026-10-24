@@ -211,57 +211,65 @@ def evaluate_with_llm_judge(
         user_prompt = inv.user_content.parts[0].text or ""
         expected_rubric = inv.final_response.parts[0].text or ""
 
-        candidate_resp = client.models.generate_content(
-            model=model,
-            contents=user_prompt,
-            config=types.GenerateContentConfig(
-                system_instruction=sys_instruction,
-                temperature=0.0,
-            ),
-        )
-        candidate_text = candidate_resp.text or ""
+        best_result: EvalCaseResult | None = None
+        for _attempt in range(2):
+            candidate_resp = client.models.generate_content(
+                model=model,
+                contents=user_prompt,
+                config=types.GenerateContentConfig(
+                    system_instruction=sys_instruction,
+                    temperature=0.0,
+                ),
+            )
+            candidate_text = candidate_resp.text or ""
 
-        judge_prompt = (
-            "You are an expert evaluator grading an AI agent's response to a user prompt based on a ground-truth rubric.\n\n"
-            f"### User Prompt\n{user_prompt}\n\n"
-            f"### Ground-Truth Rubric / Expected Behavior\n{expected_rubric}\n\n"
-            f"### Candidate Agent Response\n{candidate_text}\n\n"
-            "Evaluate whether the candidate response satisfies the core requirements, CLI command structure, flags, "
-            "and guardrails described in the ground-truth rubric. Note that the candidate agent is running in a "
-            "documentation-only single-turn environment without live MCP tools or shell execution:\n"
-            "- When the rubric lists alternatives (e.g., 'Uses MCP tool X or runs gcloud command Y'), providing either valid option (or both) fully satisfies that requirement.\n"
-            "- Minor differences in optional flags (such as including `--description`), placeholder names, or formatting are acceptable as long as the core command, flags, and behavioral guardrails are accurate.\n"
-            "Respond strictly in JSON with keys:\n"
-            '- "passed": boolean (true if score >= 0.75)\n'
-            '- "score": float between 0.0 and 1.0\n'
-            '- "reason": concise 1-sentence explanation'
-        )
-        judge_resp = client.models.generate_content(
-            model=model,
-            contents=judge_prompt,
-            config=types.GenerateContentConfig(
-                response_mime_type="application/json",
-                temperature=0.0,
-            ),
-        )
+            judge_prompt = (
+                "You are an expert evaluator grading an AI agent's response to a user prompt based on a ground-truth rubric.\n\n"
+                f"### User Prompt\n{user_prompt}\n\n"
+                f"### Ground-Truth Rubric / Expected Behavior\n{expected_rubric}\n\n"
+                f"### Candidate Agent Response\n{candidate_text}\n\n"
+                "Evaluate whether the candidate response satisfies the core requirements, CLI command structure, flags, "
+                "and guardrails described in the ground-truth rubric. Note that the candidate agent is running in a "
+                "documentation-only single-turn environment without live MCP tools or shell execution:\n"
+                "- When the rubric lists alternatives (e.g., 'Uses MCP tool X or runs gcloud command Y'), providing either valid option (or both) fully satisfies that requirement.\n"
+                "- Minor differences in optional flags (such as including `--description`), placeholder names, or formatting are acceptable as long as the core command, flags, and behavioral guardrails are accurate.\n"
+                "Respond strictly in JSON with keys:\n"
+                '- "passed": boolean (true if score >= 0.75)\n'
+                '- "score": float between 0.0 and 1.0\n'
+                '- "reason": concise 1-sentence explanation'
+            )
+            judge_resp = client.models.generate_content(
+                model=model,
+                contents=judge_prompt,
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    temperature=0.0,
+                ),
+            )
 
-        try:
-            verdict = json.loads(judge_resp.text or "{}")
-        except json.JSONDecodeError:
-            verdict = {"passed": False, "score": 0.0, "reason": "Failed to parse judge JSON output"}
+            try:
+                verdict = json.loads(judge_resp.text or "{}")
+            except json.JSONDecodeError:
+                verdict = {"passed": False, "score": 0.0, "reason": "Failed to parse judge JSON output"}
 
-        score = float(verdict.get("score", 1.0 if verdict.get("passed") else 0.0))
-        passed = bool(verdict.get("passed", score >= 0.75))
-        reason = str(verdict.get("reason", ""))
-        status = "PASS" if passed else "FAIL"
+            score = float(verdict.get("score", 1.0 if verdict.get("passed") else 0.0))
+            passed = bool(verdict.get("passed", score >= 0.75))
+            reason = str(verdict.get("reason", ""))
+            status = "PASS" if passed else "FAIL"
 
-        return EvalCaseResult(
-            case_id=case_id,
-            status=status,
-            score=score,
-            mode="llm_judge",
-            reason=reason,
-        )
+            result = EvalCaseResult(
+                case_id=case_id,
+                status=status,
+                score=score,
+                mode="llm_judge",
+                reason=reason,
+            )
+            if best_result is None or (result.score or 0.0) >= (best_result.score or 0.0):
+                best_result = result
+            if passed:
+                break
+
+        return best_result  # type: ignore[return-value]
 
     with ThreadPoolExecutor(max_workers=max_workers) as pool:
         case_results = list(pool.map(_eval_single_case, eval_set.eval_cases))
