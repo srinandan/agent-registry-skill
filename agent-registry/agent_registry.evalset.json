@@ -288,7 +288,7 @@
           "finalResponse": {
             "parts": [
               {
-                "text": "Uses `mcp_agentregistry_search_agents` or `gcloud agent-registry agents search --location=us-central1` with `--search-string=\"skills.tags:fintech\"` and `--search-string=\"skills.id:clinical-trial-matcher-match-biomarker-trials\"`."
+                "text": "Uses `mcp_agentregistry_search_agents` or `gcloud agent-registry agents search --location=us-central1` with `--search-string=\"skills.tags:fintech\"` and `--search-string=\"skills.id:clinical-trial-matcher-match-biomarker-trials\"` (either as separate commands or combined with `OR` as `--search-string=\"skills.tags:fintech OR skills.id:clinical-trial-matcher-match-biomarker-trials\"`)."
               }
             ]
           },
@@ -851,7 +851,7 @@
           "userContent": {
             "parts": [
               {
-                "text": "How do I get the IAM policy on AI application my-ai-app in us-central1, grant group:ai-team@example.com the roles/agentregistry.viewer role on that AI application, or replace its IAM policy from policy.yaml?"
+                "text": "How do I get the IAM policy on AI application my-ai-app in us-central1, grant group:ai-team@example.com the roles/agentregistry.viewer role on that AI application, or replace its IAM policy from policy.yaml, and what IAM permissions are required?"
               }
             ]
           },
@@ -881,7 +881,7 @@
           "userContent": {
             "parts": [
               {
-                "text": "How do I view and set the IAM policy on a specific skill my-skill in the us region, or bind user:alice@example.com to roles/agentregistry.viewer on that skill?"
+                "text": "How do I view and set the IAM policy on a specific skill my-skill in the us region, or bind user:alice@example.com to roles/agentregistry.viewer on that skill, and what IAM permissions are required?"
               }
             ]
           },
