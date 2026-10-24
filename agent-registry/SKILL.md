@@ -188,13 +188,30 @@ gcloud agent-registry bindings delete BINDING_NAME --location=us-central1
 ```
 
 ### 6. Skills (Alpha)
-Used to manage reusable AI Skills and Skill Revisions.
+Used to manage reusable AI Skills and Skill Revisions via the **`agentregistry` MCP server tools** (preferred when the MCP server is available) or `gcloud alpha agent-registry skills` CLI commands.
 
 > [!IMPORTANT]
-> **Supported Locations for Skills:** Skills only work in `"global"`, `"us"`, or `"eu"` regions. If the user asks for something else (e.g. `us-central1`), **do not pass that region to the `gcloud` command**. Instead, inform the user that Skills are only supported in `global`, `us`, or `eu` regions and ask them to select one of those locations.
+> **Supported Locations for Skills:** Skills only work in `"global"`, `"us"`, or `"eu"` regions. If the user asks for something else (e.g. `us-central1`), **do not pass that region to the MCP tool or `gcloud` command**. Instead, inform the user that Skills are only supported in `global`, `us`, or `eu` regions and ask them to select one of those locations.
 
 > [!NOTE]
-> The **Skills** feature is currently in **alpha** and must be executed via `gcloud alpha agent-registry skills`. Skills are not available through MCP.
+> All Skills and Skill Revisions CRUD, list, and search operations are supported through the `agentregistry` MCP server as well as `gcloud alpha agent-registry skills`. Downloading a skill revision archive payload to disk uses `gcloud alpha agent-registry skills revisions download`. As with CLI commands, execute read-only MCP calls (`list_skills`, `get_skill`, `search_skills`, `list_skill_revisions`, `get_skill_revision`) immediately, and ask for user approval before invoking mutating MCP tools (`create_skill`, `update_skill`, `delete_skill`, `create_skill_revision`, `delete_skill_revision`).
+
+#### MCP Tools for Skills & Skill Revisions (`agentregistry` MCP Server)
+
+| Operation | MCP Tool (`agentregistry`) | Key Arguments |
+|-----------|----------------------------|---------------|
+| **List Skills** | `mcp_agentregistry_list_skills` | `parent`: `projects/{project}/locations/{location}` (`global`, `us`, or `eu`); optional `filter`, `orderBy`, `pageSize`, `pageToken` |
+| **Get Skill** | `mcp_agentregistry_get_skill` | `name`: `projects/{project}/locations/{location}/skills/{skill}` |
+| **Create Skill** | `mcp_agentregistry_create_skill` | `parent`: `projects/{project}/locations/{location}`, `skillId`, `skill`: `{displayName, type: "SIMPLE", targetState: "TARGET_STATE_DRAFT" \| "TARGET_STATE_ACTIVE", description, defaultRevision, scanningConfig, publisher}` |
+| **Update Skill** | `mcp_agentregistry_update_skill` | `skill`: `{name: "projects/.../skills/{skill}", displayName, description, targetState, defaultRevision, scanningConfig}`, optional `updateMask` |
+| **Delete Skill** | `mcp_agentregistry_delete_skill` | `name`: `projects/{project}/locations/{location}/skills/{skill}`, optional `force` (`true` to also delete revisions) |
+| **Search Skills** | `mcp_agentregistry_search_skills` | `parent`: `projects/{project}/locations/{location}`, `searchString`, `searchType` (`KEYWORD` or `SEMANTIC`), optional `filter` (e.g., `state=ACTIVE`) |
+| **List Revisions** | `mcp_agentregistry_list_skill_revisions` | `parent`: `projects/{project}/locations/{location}/skills/{skill}`, optional `pageSize`, `pageToken` |
+| **Get Revision** | `mcp_agentregistry_get_skill_revision` | `name`: `projects/{project}/locations/{location}/skills/{skill}/revisions/{revision}` |
+| **Create Revision** | `mcp_agentregistry_create_skill_revision` | `parent`: `projects/{project}/locations/{location}/skills/{skill}`, optional `skillRevisionId`, `skillRevision`: `{gcsSource: {uri: "gs://..."}}` or `{archiveUploadSource: {archiveContent: "<base64-bytes>"}}` |
+| **Delete Revision** | `mcp_agentregistry_delete_skill_revision` | `name`: `projects/{project}/locations/{location}/skills/{skill}/revisions/{revision}` |
+
+#### `gcloud` CLI Usage (`gcloud alpha agent-registry skills`)
 
 ```bash
 # List Skills
@@ -230,9 +247,10 @@ gcloud alpha agent-registry skills update my-skill \
 gcloud alpha agent-registry skills delete my-skill --location=us
 
 # Manage Skill Revisions (Alpha)
-gcloud alpha agent-registry skills revisions list --location=us
-gcloud alpha agent-registry skills revisions describe REVISION_ID --location=us
-gcloud alpha agent-registry skills revisions download REVISION_ID --location=us
+gcloud alpha agent-registry skills revisions list --skill=my-skill --location=us
+gcloud alpha agent-registry skills revisions describe REVISION_ID --skill=my-skill --location=us
+gcloud alpha agent-registry skills revisions download REVISION_ID --skill=my-skill --location=us
+gcloud alpha agent-registry skills revisions delete REVISION_ID --skill=my-skill --location=us
 ```
 
 ### 7. Management Boundary Setup (Admin Governance)
@@ -480,8 +498,8 @@ All `gcloud agent-registry` commands support `--location` (required) and `--proj
 | `services` | `create`, `list`, `describe`, `update`, `delete` | GA |
 | `bindings` | `create`, `list`, `describe`, `update`, `delete` | GA |
 | `operations` | `list`, `describe` | GA |
-| `skills` | `create`, `list`, `describe`, `update`, `delete`, `search` | Alpha (`gcloud alpha agent-registry skills`) |
-| `skills revisions` | `create`, `list`, `describe`, `delete`, `download` | Alpha (`gcloud alpha agent-registry skills revisions`) |
+| `skills` | `create`, `list`, `describe`, `update`, `delete`, `search` | Alpha (`agentregistry` MCP tools + `gcloud alpha agent-registry skills`) |
+| `skills revisions` | `create`, `list`, `describe`, `delete`, `download` | Alpha (`agentregistry` MCP tools + `gcloud alpha agent-registry skills revisions`) |
 | `boundary-configs` | `describe`, `update` | GA (`gcloud resource-manager boundary-configs`) |
 | `capability-configs` | `create`, `list`, `describe`, `update`, `delete` | GA (`gcloud resource-manager capability-configs`) |
 | `boundaries` | `create`, `list`, `describe`, `update`, `delete` | GA (`gcloud resource-manager boundaries`) |
@@ -686,12 +704,18 @@ gcloud agent-registry mcp-servers search --location=us-east4 \
 
 ## Searching Skills (Alpha)
 
-> [!NOTE]
-> Skills are not yet available through MCP. To search for Skills, run the `gcloud alpha agent-registry skills search` CLI command. **Remember:** Skills only work in `"global"`, `"us"`, or `"eu"` regions.
+When searching for skills, **always default to using the `mcp_agentregistry_search_skills` MCP tool** if the `agentregistry` MCP server is available. Use the `gcloud alpha agent-registry skills search` command as a fallback. **Remember:** Skills only work in `"global"`, `"us"`, or `"eu"` regions.
 
-### gcloud Usage
+### MCP Tool Usage (`mcp_agentregistry_search_skills`)
 
-Search skills using keyword or semantic search:
+- **`parent`**: `projects/{project}/locations/{location}` (where `{location}` is `global`, `us`, or `eu`)
+- **`searchString`**: Search expression across `skillId`, `name`, `displayName`, `description`, `frontmatter.name`, `frontmatter.description`, `frontmatter.compatibility`, and `frontmatter.license` (supports `=`, `:`, `*`, `AND`, `OR`, `NOT`), or a natural-language query when `searchType` is `SEMANTIC`.
+- **`searchType`**: `KEYWORD` or `SEMANTIC`.
+- **`filter`**: Optional filter expression on `state`, `targetState`, `createTime`, or `updateTime` (e.g., `state=ACTIVE`).
+
+### gcloud Fallback Usage
+
+Search skills using keyword or semantic search via `gcloud alpha agent-registry skills search`:
 
 ```bash
 # Keyword search across searchable fields

@@ -8,6 +8,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Added
+- **Full MCP Server support for Skills & Skill Revisions** (#21):
+  - Updated [`agent-registry/SKILL.md`](agent-registry/SKILL.md) to support managing all Skills and Skill Revisions operations via the `agentregistry` MCP server tools (`mcp_agentregistry_list_skills`, `mcp_agentregistry_get_skill`, `mcp_agentregistry_create_skill`, `mcp_agentregistry_update_skill`, `mcp_agentregistry_delete_skill`, `mcp_agentregistry_search_skills`, `mcp_agentregistry_list_skill_revisions`, `mcp_agentregistry_get_skill_revision`, `mcp_agentregistry_create_skill_revision`, and `mcp_agentregistry_delete_skill_revision`), defaulting to `mcp_agentregistry_search_skills` for keyword and semantic skill searches with `gcloud alpha agent-registry skills` as CLI fallback.
 - **Management Boundary setup & admin governance** (#21):
   - Added Section 7 (`Management Boundary Setup (Admin Governance)`) to [`agent-registry/SKILL.md`](agent-registry/SKILL.md) guiding administrators through `BoundaryConfig`, `CapabilityConfig`, `Boundary`, and Tag Binding setup using `gcloud resource-manager`.
   - Added interactive scoping prompts (Folder vs. Organization anchor, tag-key partitioning strategy, dedicated vs. shared Management Project per perimeter for `dev`/`prod` catalog and IAM isolation, Bring-Your-Own vs. Google-managed Management Project, `agent-management` vs. `agent-management,app-management` capability types, and member project enrollment).

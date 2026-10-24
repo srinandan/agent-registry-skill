@@ -438,7 +438,37 @@
           "finalResponse": {
             "parts": [
               {
-                "text": "Constructs `gcloud alpha agent-registry skills create finops-optimizer --location=us --display-name=\"...\" --type=simple --payload=/tmp/skill.zip` (asking for approval first) and `gcloud alpha agent-registry skills search --location=us --query=\"optimize cloud costs\" --search-type=semantic`."
+                "text": "Uses `mcp_agentregistry_create_skill` / `mcp_agentregistry_create_skill_revision` or `gcloud alpha agent-registry skills create finops-optimizer --location=us --display-name=\"...\" --type=simple --payload=/tmp/skill.zip` (asking for approval first), and defaults to `mcp_agentregistry_search_skills` (`searchType: \"SEMANTIC\"`) or `gcloud alpha agent-registry skills search --location=us --query=\"optimize cloud costs\" --search-type=semantic`."
+              }
+            ]
+          },
+          "creationTimestamp": 0.0
+        }
+      ],
+      "sessionInput": {
+        "appName": "agent-registry",
+        "userId": "eval_user",
+        "state": {}
+      },
+      "creationTimestamp": 0.0,
+      "finalSessionState": {}
+    },
+    {
+      "evalId": "skills_mcp_crud_and_revisions_operations",
+      "conversation": [
+        {
+          "invocationId": "",
+          "userContent": {
+            "parts": [
+              {
+                "text": "Using the agentregistry MCP server in the global location, how do I list, get, create, update, search, and delete skills and skill revisions?"
+              }
+            ]
+          },
+          "finalResponse": {
+            "parts": [
+              {
+                "text": "Documents the `agentregistry` MCP tools for Skills and Skill Revisions in `projects/{project}/locations/global`: read-only tools `mcp_agentregistry_list_skills`, `mcp_agentregistry_get_skill`, `mcp_agentregistry_search_skills` (`KEYWORD` or `SEMANTIC`), `mcp_agentregistry_list_skill_revisions`, and `mcp_agentregistry_get_skill_revision` (executed immediately), and mutating tools `mcp_agentregistry_create_skill`, `mcp_agentregistry_update_skill`, `mcp_agentregistry_delete_skill`, `mcp_agentregistry_create_skill_revision`, and `mcp_agentregistry_delete_skill_revision` (requiring user approval before invocation)."
               }
             ]
           },
@@ -468,7 +498,7 @@
           "finalResponse": {
             "parts": [
               {
-                "text": "Refuses to pass `us-central1` to `gcloud alpha agent-registry skills list`, informs the user that Skills are only supported in `global`, `us`, or `eu` regions, and asks the user to select one of those valid locations."
+                "text": "Refuses to pass `us-central1` to `mcp_agentregistry_list_skills` or `gcloud alpha agent-registry skills list`, informs the user that Skills are only supported in `global`, `us`, or `eu` regions, and asks the user to select one of those valid locations."
               }
             ]
           },
@@ -491,14 +521,14 @@
           "userContent": {
             "parts": [
               {
-                "text": "List revisions, describe revision v2-ga, and download the payload for revision v2-ga in the us region."
+                "text": "List revisions, describe revision v2-ga, and download the payload for revision v2-ga of skill my-skill in the us region."
               }
             ]
           },
           "finalResponse": {
             "parts": [
               {
-                "text": "Uses `gcloud alpha agent-registry skills revisions list --location=us`, `gcloud alpha agent-registry skills revisions describe v2-ga --location=us`, and `gcloud alpha agent-registry skills revisions download v2-ga --location=us`."
+                "text": "Uses `mcp_agentregistry_list_skill_revisions` / `gcloud alpha agent-registry skills revisions list --skill=my-skill --location=us`, `mcp_agentregistry_get_skill_revision` / `gcloud alpha agent-registry skills revisions describe v2-ga --skill=my-skill --location=us`, and `gcloud alpha agent-registry skills revisions download v2-ga --skill=my-skill --location=us`."
               }
             ]
           },

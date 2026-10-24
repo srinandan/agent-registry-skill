@@ -14,7 +14,7 @@ A skill for the Gemini CLI and AI agents to interact with Google Cloud's Agent R
 - **Rich Examples**: Built-in support for registering common resources like GitHub MCP Servers, Salesforce Agents, and Vertex AI Model Garden endpoints.
 - **Python ADK Integration**: Specialized support and snippets for the Google Agent Development Kit (ADK).
 - **GKE Based Agents**: Support for configuring Kubernetes Deployments to act as Agents or MCP Servers.
-- **Skills Management**: Built-in support for exploring and managing Skills and Skill Revisions using `gcloud alpha agent-registry skills`.
+- **Skills Management**: Built-in support for exploring and managing Skills and Skill Revisions via the `agentregistry` MCP server tools (`list_skills`, `get_skill`, `create_skill`, `update_skill`, `delete_skill`, `search_skills`, `list_skill_revisions`, `get_skill_revision`, `create_skill_revision`, `delete_skill_revision`) and `gcloud alpha agent-registry skills`.
 - **Management Boundary Governance**: Interactive guidance and best practices for Agent Registry administrators to configure hub-and-spoke perimeters (`BoundaryConfig`, `CapabilityConfig`, `Boundary`, and Tag Bindings) and verify cross-project agent discovery.
 
 ## Installation
