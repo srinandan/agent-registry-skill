@@ -265,6 +265,23 @@ Used by Agent Registry administrators to configure hub-and-spoke governance peri
 | **`Boundary`** | `gcloud resource-manager boundaries` | Logical perimeter under a Folder or Organization that selects child projects matching a specific tag value (`--tag-key` and `--tag-value`) and links to a `CapabilityConfig`. |
 | **Tag Bindings** | `gcloud resource-manager tags bindings` | Enrolls the Management Project and Member (Spoke) Projects into a boundary perimeter by binding the corresponding tag value (e.g., `975672035171/environment/dev`). |
 
+#### Required IAM Roles & Permissions for Boundary Setup
+
+Before running boundary provisioning commands, verify that the administrator holds the required IAM roles on the appropriate hierarchy nodes:
+
+| Role | Where to Grant (Target Resource) | Underlying Permissions | Purpose |
+|------|----------------------------------|------------------------|---------|
+| **`roles/resourcemanager.editor`** *(Resource Manager Editor)* | **Parent Folder or Organization** (`folders/FOLDER_ID` or `organizations/ORG_ID`) | • `resourcemanager.capabilityConfigs.{create,get,update,delete,list}`<br>• `resourcemanager.boundaries.{create,get,update,delete,list,associateToCapabilityConfig}`<br>• `resourcemanager.boundaryConfigs.{get,update}`<br>• `resourcemanager.boundaryMembers.{get,list}` | Create, update, link, and delete `CapabilityConfig`, `Boundary`, and singleton `BoundaryConfig` resources under the folder/org. *(Note: There is no dedicated curated `boundaryAdmin` role; these permissions ship inside `roles/resourcemanager.editor` or a Custom Role.)* |
+| **`roles/resourcemanager.viewer`** *(Resource Manager Viewer)* | **Parent Folder or Organization** (`folders/FOLDER_ID` or `organizations/ORG_ID`) | • `resourcemanager.capabilityConfigs.{get,list}`<br>• `resourcemanager.boundaries.{get,list}`<br>• `resourcemanager.boundaryConfigs.get`<br>• `resourcemanager.boundaryMembers.{get,list}` | Read-only inspection of boundary configurations, capability configs, boundaries, and effective boundary members. |
+| **`roles/owner`** or **`roles/editor`** *(Project Owner / Editor)* | **Candidate Bring-Your-Own Management Project** (`projects/PROJECT_NUMBER`) | • `resourcemanager.projects.associateToCapabilityConfig` | Required on an existing project when designating it as a Management Project via `--management-project=projects/<PROJECT_NUMBER>` on `capability-configs create`. (Not needed if Cloud Resource Manager auto-provisions a Google-managed project.) |
+| **`roles/resourcemanager.tagUser`** *(Tag User)* | **Both the Tag Value AND each Target Project** (Hub + Member Spoke Projects) | • `resourcemanager.tagValues.use`<br>• `resourcemanager.tagValueBindings.{create,delete}` | Required to attach or detach environment/perimeter tag bindings (`gcloud resource-manager tags bindings create/delete`) on projects. *(Creating new Tag Keys/Values requires `roles/resourcemanager.tagAdmin` on the Organization.)* |
+| **`roles/agentregistry.admin`** / **`roles/agentregistry.viewer`** | **Management Project (Hub)** (`projects/MGMT_PROJECT_ID`) | • `agentregistry.*` | `roles/agentregistry.admin` to centrally register `Services` and `Bindings` on the hub; `roles/agentregistry.viewer` to query (`list`, `describe`, `search`) the aggregated agent, MCP server, and skill catalog across the boundary. |
+
+> **Custom Role & IAM Notes:**
+> - All `resourcemanager.capabilityConfigs.*`, `resourcemanager.boundaries.*`, and `resourcemanager.boundaryConfigs.*` permissions support **IAM Custom Roles** and **IAM Deny** policies (`create` and `list` are checked as `parents_only` on the Folder or Organization).
+> - Note the permission resource noun for the singleton `boundaryConfig` is plural (`resourcemanager.boundaryConfigs.get` and `resourcemanager.boundaryConfigs.update`).
+> - Attaching a `Boundary` to a `CapabilityConfig` (`capability-configs update --add-boundaries`) checks both `resourcemanager.capabilityConfigs.update` and `resourcemanager.boundaries.associateToCapabilityConfig` on the parent node.
+
 #### Interactive Scoping Questions for Admins (Ask Before Provisioning)
 
 When an administrator asks to set up a Management Boundary or `CapabilityConfig`, **proactively ask these scoping questions** (skipping any details they have already provided) to design the right topology before constructing mutating commands:

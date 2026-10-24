@@ -754,6 +754,36 @@
       "finalSessionState": {}
     },
     {
+      "evalId": "boundary_iam_roles_and_permissions",
+      "conversation": [
+        {
+          "invocationId": "",
+          "userContent": {
+            "parts": [
+              {
+                "text": "What IAM roles and permissions do I need to create a Boundary, a CapabilityConfig with an existing project as the Management Project, configure BoundaryConfig, and bind tags to member projects?"
+              }
+            ]
+          },
+          "finalResponse": {
+            "parts": [
+              {
+                "text": "Details the required IAM roles and target resources: (1) `roles/resourcemanager.editor` on the parent Folder or Organization (granting `resourcemanager.capabilityConfigs.{create,get,update,delete,list}`, `resourcemanager.boundaries.{create,get,update,delete,list,associateToCapabilityConfig}`, `resourcemanager.boundaryConfigs.{get,update}`, and `resourcemanager.boundaryMembers.{get,list}`; noting there is no dedicated curated `boundaryAdmin` role), (2) `roles/owner` or `roles/editor` on the candidate Bring-Your-Own project (granting `resourcemanager.projects.associateToCapabilityConfig` when passing `--management-project=projects/<PROJECT_NUMBER>`), (3) `roles/resourcemanager.tagUser` on both the Tag Value and each target project (`resourcemanager.tagValues.use`, `resourcemanager.tagValueBindings.{create,delete}`) to bind/unbind tags, and (4) `roles/agentregistry.admin` / `roles/agentregistry.viewer` on the Management Project (Hub) to manage services/bindings and query the aggregated catalog."
+              }
+            ]
+          },
+          "creationTimestamp": 0.0
+        }
+      ],
+      "sessionInput": {
+        "appName": "agent-registry",
+        "userId": "eval_user",
+        "state": {}
+      },
+      "creationTimestamp": 0.0,
+      "finalSessionState": {}
+    },
+    {
       "evalId": "python_adk_integration_mcp_and_a2a",
       "conversation": [
         {

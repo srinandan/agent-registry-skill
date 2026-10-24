@@ -50,13 +50,17 @@ Once installed, you can talk to Gemini in natural language:
 
 ## Permissions
 
-The following IAM roles are required to interact with the Agent Registry:
+The following IAM roles are required to interact with the Agent Registry and configure Management Boundaries:
 
-| Role | Access Level |
-|------|--------------|
-| `roles/agentregistry.admin` | Full administrative access |
-| `roles/agentregistry.editor` | Editor access |
-| `roles/agentregistry.viewer` | Read only access |
+| Role | Target Resource | Access Level |
+|------|-----------------|--------------|
+| `roles/agentregistry.admin` | Project / Management Project | Full administrative access to Agent Registry |
+| `roles/agentregistry.editor` | Project / Management Project | Editor access to Agent Registry |
+| `roles/agentregistry.viewer` | Project / Management Project | Read-only access to Agent Registry |
+| `roles/resourcemanager.editor` | Parent Folder or Organization | Create, update, link, and delete `BoundaryConfig`, `CapabilityConfig`, and `Boundary` resources |
+| `roles/resourcemanager.viewer` | Parent Folder or Organization | Read `BoundaryConfig`, `CapabilityConfig`, `Boundary`, and `BoundaryMember` resources |
+| `roles/owner` or `roles/editor` | Candidate BYO Management Project | Grants `resourcemanager.projects.associateToCapabilityConfig` to designate an existing project as a Management Project |
+| `roles/resourcemanager.tagUser` | Tag Value + Target Projects | Bind/unbind tag values (`tags bindings create/delete`) to enroll projects in a boundary |
 
 ## Contributing
 Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to contribute to this project.
