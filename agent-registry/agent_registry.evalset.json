@@ -1,0 +1,818 @@
+{
+  "eval_set_id": "agent-registry",
+  "name": "agent-registry",
+  "description": "Comprehensive ADK evaluation suite for the Google Cloud Agent Registry skill, covering MCP servers, Agents, Endpoints, Bindings, GKE annotations, Skills (Alpha), Dashboards, Python ADK integration, and Management Boundary setup and governance.",
+  "eval_cases": [
+    {
+      "evalId": "register_mcp_server_tool_spec",
+      "conversation": [
+        {
+          "invocationId": "",
+          "userContent": {
+            "parts": [
+              {
+                "text": "I want to register a new GitHub MCP server in us-central1 at https://api.github.com/mcp using jsonrpc and my tool spec JSON file. Show me the gcloud command I'll run and let me know what you need from my spec file."
+              }
+            ]
+          },
+          "finalResponse": {
+            "parts": [
+              {
+                "text": "Prompts the user to paste the contents of their MCP server spec JSON file for --mcp-server-spec-content, constructs `gcloud agent-registry services create github --location=us-central1 --display-name=\"GitHub MCP Server\" --mcp-server-spec-type=tool-spec --mcp-server-spec-content='...' --interfaces='[{\"protocolBinding\": \"jsonrpc\", \"url\": \"https://api.github.com/mcp\"}]'`, and asks for user approval before executing the mutating create command."
+              }
+            ]
+          },
+          "creationTimestamp": 0.0
+        }
+      ],
+      "sessionInput": {
+        "appName": "agent-registry",
+        "userId": "eval_user",
+        "state": {}
+      },
+      "creationTimestamp": 0.0,
+      "finalSessionState": {}
+    },
+    {
+      "evalId": "list_mcp_servers_immediate_execution",
+      "conversation": [
+        {
+          "invocationId": "",
+          "userContent": {
+            "parts": [
+              {
+                "text": "List all my MCP servers in us-central1."
+              }
+            ]
+          },
+          "finalResponse": {
+            "parts": [
+              {
+                "text": "Constructs `gcloud agent-registry mcp-servers list --location=us-central1` and executes the read-only list command immediately without requiring prior user approval."
+              }
+            ]
+          },
+          "creationTimestamp": 0.0
+        }
+      ],
+      "sessionInput": {
+        "appName": "agent-registry",
+        "userId": "eval_user",
+        "state": {}
+      },
+      "creationTimestamp": 0.0,
+      "finalSessionState": {}
+    },
+    {
+      "evalId": "filter_mcp_servers_by_tool_name",
+      "conversation": [
+        {
+          "invocationId": "",
+          "userContent": {
+            "parts": [
+              {
+                "text": "Which MCP server in us-central1 exposes a tool named create_issue?"
+              }
+            ]
+          },
+          "finalResponse": {
+            "parts": [
+              {
+                "text": "Maps the tool name filter to `tools.name` and runs `gcloud agent-registry mcp-servers list --location=us-central1 --filter=\"tools.name:create_issue\"`."
+              }
+            ]
+          },
+          "creationTimestamp": 0.0
+        }
+      ],
+      "sessionInput": {
+        "appName": "agent-registry",
+        "userId": "eval_user",
+        "state": {}
+      },
+      "creationTimestamp": 0.0,
+      "finalSessionState": {}
+    },
+    {
+      "evalId": "filter_mcp_servers_cloud_run_urn",
+      "conversation": [
+        {
+          "invocationId": "",
+          "userContent": {
+            "parts": [
+              {
+                "text": "Find all Cloud Run MCP servers in us-central1 using the MCP Server ID."
+              }
+            ]
+          },
+          "finalResponse": {
+            "parts": [
+              {
+                "text": "Matches `mcpServerId:run` using `gcloud agent-registry mcp-servers list --location=us-central1 --filter=\"mcpServerId:run\"` or `gcloud agent-registry mcp-servers search --location=us-central1 --search-string=\"mcpServerId:run\"` (or `mcp_agentregistry_search_mcp_servers`)."
+              }
+            ]
+          },
+          "creationTimestamp": 0.0
+        }
+      ],
+      "sessionInput": {
+        "appName": "agent-registry",
+        "userId": "eval_user",
+        "state": {}
+      },
+      "creationTimestamp": 0.0,
+      "finalSessionState": {}
+    },
+    {
+      "evalId": "search_mcp_servers_boolean_or",
+      "conversation": [
+        {
+          "invocationId": "",
+          "userContent": {
+            "parts": [
+              {
+                "text": "Search for MCP servers in us-central1 whose display name starts with Figma or Snowflake."
+              }
+            ]
+          },
+          "finalResponse": {
+            "parts": [
+              {
+                "text": "Defaults to `mcp_agentregistry_search_mcp_servers` if the MCP server is available, or runs `gcloud agent-registry mcp-servers search --location=us-central1 --search-string=\"displayName:Figma* OR displayName:Snowflake*\"`."
+              }
+            ]
+          },
+          "creationTimestamp": 0.0
+        }
+      ],
+      "sessionInput": {
+        "appName": "agent-registry",
+        "userId": "eval_user",
+        "state": {}
+      },
+      "creationTimestamp": 0.0,
+      "finalSessionState": {}
+    },
+    {
+      "evalId": "register_a2a_agent_card",
+      "conversation": [
+        {
+          "invocationId": "",
+          "userContent": {
+            "parts": [
+              {
+                "text": "Register a new A2A agent called fraud-sentinel (display name 'Fraud Sentinel Agent') in us-central1 using my agent_card.json file, and show me the gcloud command."
+              }
+            ]
+          },
+          "finalResponse": {
+            "parts": [
+              {
+                "text": "Asks the user to paste the contents of their `agent_card.json` file for `--agent-spec-content`, constructs `gcloud agent-registry services create fraud-sentinel --location=us-central1 --display-name=\"...\" --agent-spec-type=a2a-agent-card --agent-spec-content='...'`, and requests user approval before executing."
+              }
+            ]
+          },
+          "creationTimestamp": 0.0
+        }
+      ],
+      "sessionInput": {
+        "appName": "agent-registry",
+        "userId": "eval_user",
+        "state": {}
+      },
+      "creationTimestamp": 0.0,
+      "finalSessionState": {}
+    },
+    {
+      "evalId": "register_no_spec_agent_interfaces",
+      "conversation": [
+        {
+          "invocationId": "",
+          "userContent": {
+            "parts": [
+              {
+                "text": "Register a Salesforce Einstein agent in us-central1 at https://api.salesforce.com/agent/v1 using http-json with no spec."
+              }
+            ]
+          },
+          "finalResponse": {
+            "parts": [
+              {
+                "text": "Constructs `gcloud agent-registry services create salesforce --location=us-central1 --display-name=\"Salesforce Agent\" --description=\"Salesforce Einstein Agent\" --agent-spec-type=no-spec --interfaces='[{\"protocolBinding\": \"http-json\", \"url\": \"https://api.salesforce.com/agent/v1\"}]'` and asks for approval before running."
+              }
+            ]
+          },
+          "creationTimestamp": 0.0
+        }
+      ],
+      "sessionInput": {
+        "appName": "agent-registry",
+        "userId": "eval_user",
+        "state": {}
+      },
+      "creationTimestamp": 0.0,
+      "finalSessionState": {}
+    },
+    {
+      "evalId": "filter_agents_reasoning_engine_runtime",
+      "conversation": [
+        {
+          "invocationId": "",
+          "userContent": {
+            "parts": [
+              {
+                "text": "Show me all Vertex AI Agent Engine (Reasoning Engine) agents in us-central1."
+              }
+            ]
+          },
+          "finalResponse": {
+            "parts": [
+              {
+                "text": "Maps Vertex AI Agent Engine / Reasoning Engine to runtime value `reasoningEngine` and runs `gcloud agent-registry agents list --location=us-central1 --filter=\"attributes.\\\"agentregistry.googleapis.com/system/RuntimeReference\\\".uri:reasoningEngine\"`."
+              }
+            ]
+          },
+          "creationTimestamp": 0.0
+        }
+      ],
+      "sessionInput": {
+        "appName": "agent-registry",
+        "userId": "eval_user",
+        "state": {}
+      },
+      "creationTimestamp": 0.0,
+      "finalSessionState": {}
+    },
+    {
+      "evalId": "filter_agents_runtime_identity_principal",
+      "conversation": [
+        {
+          "invocationId": "",
+          "userContent": {
+            "parts": [
+              {
+                "text": "List all agents in us-central1 whose runtime identity principal contains service-553108137791."
+              }
+            ]
+          },
+          "finalResponse": {
+            "parts": [
+              {
+                "text": "Maps identity to `attributes.\"agentregistry.googleapis.com/system/RuntimeIdentity\".principal` and runs `gcloud agent-registry agents list --location=us-central1 --filter=\"attributes.\\\"agentregistry.googleapis.com/system/RuntimeIdentity\\\".principal:service-553108137791\"`."
+              }
+            ]
+          },
+          "creationTimestamp": 0.0
+        }
+      ],
+      "sessionInput": {
+        "appName": "agent-registry",
+        "userId": "eval_user",
+        "state": {}
+      },
+      "creationTimestamp": 0.0,
+      "finalSessionState": {}
+    },
+    {
+      "evalId": "search_agents_by_skill_tags_and_id",
+      "conversation": [
+        {
+          "invocationId": "",
+          "userContent": {
+            "parts": [
+              {
+                "text": "Search for agents in us-central1 that have the skill tag 'fintech' or skill ID 'clinical-trial-matcher-match-biomarker-trials'."
+              }
+            ]
+          },
+          "finalResponse": {
+            "parts": [
+              {
+                "text": "Uses `mcp_agentregistry_search_agents` or `gcloud agent-registry agents search --location=us-central1` with `--search-string=\"skills.tags:fintech\"` and `--search-string=\"skills.id:clinical-trial-matcher-match-biomarker-trials\"`."
+              }
+            ]
+          },
+          "creationTimestamp": 0.0
+        }
+      ],
+      "sessionInput": {
+        "appName": "agent-registry",
+        "userId": "eval_user",
+        "state": {}
+      },
+      "creationTimestamp": 0.0,
+      "finalSessionState": {}
+    },
+    {
+      "evalId": "search_agents_skill_description_no_wildcard_guardrail",
+      "conversation": [
+        {
+          "invocationId": "",
+          "userContent": {
+            "parts": [
+              {
+                "text": "Can I use a suffix wildcard like skills.description:MedDRA* to search for agents in us-central1 whose skill description mentions MedDRA?"
+              }
+            ]
+          },
+          "finalResponse": {
+            "parts": [
+              {
+                "text": "Explains that suffix wildcard `*` is not supported on `skills.description`, and uses token match `--search-string=\"skills.description:MedDRA\"` on `gcloud agent-registry agents search --location=us-central1` (or `mcp_agentregistry_search_agents`)."
+              }
+            ]
+          },
+          "creationTimestamp": 0.0
+        }
+      ],
+      "sessionInput": {
+        "appName": "agent-registry",
+        "userId": "eval_user",
+        "state": {}
+      },
+      "creationTimestamp": 0.0,
+      "finalSessionState": {}
+    },
+    {
+      "evalId": "register_and_update_endpoint",
+      "conversation": [
+        {
+          "invocationId": "",
+          "userContent": {
+            "parts": [
+              {
+                "text": "Register an endpoint called gemini-models in us-central1 for https://us-central1-aiplatform.googleapis.com/v1beta1/publishers/*/models and then update its display name to 'Model Garden on Vertex AI'."
+              }
+            ]
+          },
+          "finalResponse": {
+            "parts": [
+              {
+                "text": "Shows `gcloud agent-registry services create gemini-models --location=us-central1 --display-name=\"Vertex AI Model Garden\" --endpoint-spec-type=no-spec --interfaces='[{\"protocolBinding\": \"jsonrpc\", \"url\": \"https://us-central1-aiplatform.googleapis.com/v1beta1/publishers/*/models\"}]'` and `gcloud agent-registry services update gemini-models --display-name=\"Model Garden on Vertex AI\" --location=us-central1`, requesting user approval before executing the mutating commands."
+              }
+            ]
+          },
+          "creationTimestamp": 0.0
+        }
+      ],
+      "sessionInput": {
+        "appName": "agent-registry",
+        "userId": "eval_user",
+        "state": {}
+      },
+      "creationTimestamp": 0.0,
+      "finalSessionState": {}
+    },
+    {
+      "evalId": "annotate_gke_deployment_yaml",
+      "conversation": [
+        {
+          "invocationId": "",
+          "userContent": {
+            "parts": [
+              {
+                "text": "Configure my Kubernetes deployment in ./k8s/deployment.yaml to be discovered as an Agent in Agent Registry."
+              }
+            ]
+          },
+          "finalResponse": {
+            "parts": [
+              {
+                "text": "Uses `./scripts/annotate_gke.py ./k8s/deployment.yaml --type AGENT` to add the `apphub.cloud.google.com/functional-type` annotation to the Kubernetes YAML file."
+              }
+            ]
+          },
+          "creationTimestamp": 0.0
+        }
+      ],
+      "sessionInput": {
+        "appName": "agent-registry",
+        "userId": "eval_user",
+        "state": {}
+      },
+      "creationTimestamp": 0.0,
+      "finalSessionState": {}
+    },
+    {
+      "evalId": "create_binding_target_and_auth_provider",
+      "conversation": [
+        {
+          "invocationId": "",
+          "userContent": {
+            "parts": [
+              {
+                "text": "Create a binding called agent-to-jira in us-central1 connecting source agent URN_AGENT_A to target MCP server URN_MCP_JIRA, and show how to create an auth-provider binding."
+              }
+            ]
+          },
+          "finalResponse": {
+            "parts": [
+              {
+                "text": "Constructs `gcloud agent-registry bindings create agent-to-jira --location=us-central1 --display-name=\"...\" --source-identifier=\"URN_AGENT_A\" --target-identifier=\"URN_MCP_JIRA\"` and demonstrates `--auth-provider=\"projects/PROJECT_ID/locations/REGION/connectors/AUTH_PROVIDER_ID\"`, asking for approval before running mutating commands."
+              }
+            ]
+          },
+          "creationTimestamp": 0.0
+        }
+      ],
+      "sessionInput": {
+        "appName": "agent-registry",
+        "userId": "eval_user",
+        "state": {}
+      },
+      "creationTimestamp": 0.0,
+      "finalSessionState": {}
+    },
+    {
+      "evalId": "skills_alpha_create_and_semantic_search",
+      "conversation": [
+        {
+          "invocationId": "",
+          "userContent": {
+            "parts": [
+              {
+                "text": "Create a new skill called finops-optimizer in the us region from /tmp/skill.zip and search for skills that optimize cloud costs using semantic search."
+              }
+            ]
+          },
+          "finalResponse": {
+            "parts": [
+              {
+                "text": "Uses `mcp_agentregistry_create_skill` / `mcp_agentregistry_create_skill_revision` or `gcloud alpha agent-registry skills create finops-optimizer --location=us --display-name=\"...\" --type=simple --payload=/tmp/skill.zip` (asking for approval first), and defaults to `mcp_agentregistry_search_skills` (`searchType: \"SEMANTIC\"`) or `gcloud alpha agent-registry skills search --location=us --query=\"optimize cloud costs\" --search-type=semantic`."
+              }
+            ]
+          },
+          "creationTimestamp": 0.0
+        }
+      ],
+      "sessionInput": {
+        "appName": "agent-registry",
+        "userId": "eval_user",
+        "state": {}
+      },
+      "creationTimestamp": 0.0,
+      "finalSessionState": {}
+    },
+    {
+      "evalId": "skills_mcp_crud_and_revisions_operations",
+      "conversation": [
+        {
+          "invocationId": "",
+          "userContent": {
+            "parts": [
+              {
+                "text": "Using the agentregistry MCP server in the global location, how do I list, get, create, update, search, and delete skills and skill revisions?"
+              }
+            ]
+          },
+          "finalResponse": {
+            "parts": [
+              {
+                "text": "Documents the `agentregistry` MCP tools for Skills and Skill Revisions in `projects/{project}/locations/global`: read-only tools `mcp_agentregistry_list_skills`, `mcp_agentregistry_get_skill`, `mcp_agentregistry_search_skills` (`KEYWORD` or `SEMANTIC`), `mcp_agentregistry_list_skill_revisions`, and `mcp_agentregistry_get_skill_revision` (executed immediately), and mutating tools `mcp_agentregistry_create_skill`, `mcp_agentregistry_update_skill`, `mcp_agentregistry_delete_skill`, `mcp_agentregistry_create_skill_revision`, and `mcp_agentregistry_delete_skill_revision` (requiring user approval before invocation)."
+              }
+            ]
+          },
+          "creationTimestamp": 0.0
+        }
+      ],
+      "sessionInput": {
+        "appName": "agent-registry",
+        "userId": "eval_user",
+        "state": {}
+      },
+      "creationTimestamp": 0.0,
+      "finalSessionState": {}
+    },
+    {
+      "evalId": "skills_invalid_single_region_refusal",
+      "conversation": [
+        {
+          "invocationId": "",
+          "userContent": {
+            "parts": [
+              {
+                "text": "List all my Agent Registry skills in us-central1."
+              }
+            ]
+          },
+          "finalResponse": {
+            "parts": [
+              {
+                "text": "Refuses to pass `us-central1` to `mcp_agentregistry_list_skills` or `gcloud alpha agent-registry skills list`, informs the user that Skills are only supported in `global`, `us`, or `eu` regions, and asks the user to select one of those valid locations."
+              }
+            ]
+          },
+          "creationTimestamp": 0.0
+        }
+      ],
+      "sessionInput": {
+        "appName": "agent-registry",
+        "userId": "eval_user",
+        "state": {}
+      },
+      "creationTimestamp": 0.0,
+      "finalSessionState": {}
+    },
+    {
+      "evalId": "manage_skill_revisions_alpha",
+      "conversation": [
+        {
+          "invocationId": "",
+          "userContent": {
+            "parts": [
+              {
+                "text": "List revisions, describe revision v2-ga, and download the payload for revision v2-ga of skill my-skill in the us region."
+              }
+            ]
+          },
+          "finalResponse": {
+            "parts": [
+              {
+                "text": "Uses `mcp_agentregistry_list_skill_revisions` / `gcloud alpha agent-registry skills revisions list --skill=my-skill --location=us`, `mcp_agentregistry_get_skill_revision` / `gcloud alpha agent-registry skills revisions describe v2-ga --skill=my-skill --location=us`, and `gcloud alpha agent-registry skills revisions download v2-ga --skill=my-skill --location=us`."
+              }
+            ]
+          },
+          "creationTimestamp": 0.0
+        }
+      ],
+      "sessionInput": {
+        "appName": "agent-registry",
+        "userId": "eval_user",
+        "state": {}
+      },
+      "creationTimestamp": 0.0,
+      "finalSessionState": {}
+    },
+    {
+      "evalId": "generate_consolidated_dashboards",
+      "conversation": [
+        {
+          "invocationId": "",
+          "userContent": {
+            "parts": [
+              {
+                "text": "Show me consolidated Markdown dashboards for my agents, MCP servers, and skills."
+              }
+            ]
+          },
+          "finalResponse": {
+            "parts": [
+              {
+                "text": "Runs `./scripts/agent-dashboard.sh` for agents, `./scripts/mcp-dashboard.sh` for MCP servers, and `./scripts/skill-dashboard.sh` for skills."
+              }
+            ]
+          },
+          "creationTimestamp": 0.0
+        }
+      ],
+      "sessionInput": {
+        "appName": "agent-registry",
+        "userId": "eval_user",
+        "state": {}
+      },
+      "creationTimestamp": 0.0,
+      "finalSessionState": {}
+    },
+    {
+      "evalId": "boundary_interactive_scoping_and_best_practices",
+      "conversation": [
+        {
+          "invocationId": "",
+          "userContent": {
+            "parts": [
+              {
+                "text": "I am an Agent Registry admin and I want to set up a management boundary for our projects. How should we set this up?"
+              }
+            ]
+          },
+          "finalResponse": {
+            "parts": [
+              {
+                "text": "Asks interactive scoping questions (Folder vs. Organization anchor, tag-key partitioning strategy such as environment=dev/prod vs. single boundary, dedicated CapabilityConfig + Management Project per perimeter vs. shared hub, Bring-Your-Own vs. Google-managed Management Project, agent-management vs. agent-management,app-management types, and member projects to enroll) and explains best practices including setting BoundaryConfig tagKey before attaching boundaries, using separate CapabilityConfigs/Management Projects for strict dev/prod catalog and IAM isolation, and using project numbers."
+              }
+            ]
+          },
+          "creationTimestamp": 0.0
+        }
+      ],
+      "sessionInput": {
+        "appName": "agent-registry",
+        "userId": "eval_user",
+        "state": {}
+      },
+      "creationTimestamp": 0.0,
+      "finalSessionState": {}
+    },
+    {
+      "evalId": "boundary_end_to_end_dev_prod_provisioning",
+      "conversation": [
+        {
+          "invocationId": "",
+          "userContent": {
+            "parts": [
+              {
+                "text": "Set up isolated dev and prod management boundaries under folder 849163983723 in org 975672035171 using tag key 975672035171/environment. Use project number 1066599796742 as the dev hub (with spoke projects 220378623452 and 553108137791) and project number 592695869630 as the prod hub (with spoke projects 455819280907 and 868507208815)."
+              }
+            ]
+          },
+          "finalResponse": {
+            "parts": [
+              {
+                "text": "Provides the step-by-step commands (requesting approval before mutating steps): (1) `gcloud resource-manager boundary-configs update --folder=849163983723 --tag-key=\"975672035171/environment\"`, (2) `gcloud resource-manager tags bindings create` for `975672035171/environment/dev` and `975672035171/environment/prod` on `--parent=//cloudresourcemanager.googleapis.com/projects/$pnum`, (3) `gcloud resource-manager capability-configs create` with `--folder=849163983723 --types=agent-management --management-project=projects/<PROJECT_NUMBER>`, (4) `gcloud resource-manager boundaries create` for `agents-dev` (`--tag-value=\"dev\"`) and `agents-prod` (`--tag-value=\"prod\"`), and (5) `gcloud resource-manager capability-configs update` with `--boundaries=folders/849163983723/boundaries/...`."
+              }
+            ]
+          },
+          "creationTimestamp": 0.0
+        }
+      ],
+      "sessionInput": {
+        "appName": "agent-registry",
+        "userId": "eval_user",
+        "state": {}
+      },
+      "creationTimestamp": 0.0,
+      "finalSessionState": {}
+    },
+    {
+      "evalId": "boundary_project_number_requirement_guardrail",
+      "conversation": [
+        {
+          "invocationId": "",
+          "userContent": {
+            "parts": [
+              {
+                "text": "Create a capability config called agent-governance (display name 'Agent Governance Capability') under folder 849163983723 using my existing project ID agent-registry-demo-1 as the management project. Can I pass the project ID directly to --management-project?"
+              }
+            ]
+          },
+          "finalResponse": {
+            "parts": [
+              {
+                "text": "Explains that CRM v3 requires the project number (`projects/<PROJECT_NUMBER>`) rather than the project ID for `--management-project`, resolves the project number via `gcloud projects describe agent-registry-demo-1 --format=\"value(projectNumber)\"`, and constructs `gcloud resource-manager capability-configs create agent-governance --folder=849163983723 --display-name=\"Agent Governance Capability\" --types=agent-management --management-project=projects/<PROJECT_NUMBER>`."
+              }
+            ]
+          },
+          "creationTimestamp": 0.0
+        }
+      ],
+      "sessionInput": {
+        "appName": "agent-registry",
+        "userId": "eval_user",
+        "state": {}
+      },
+      "creationTimestamp": 0.0,
+      "finalSessionState": {}
+    },
+    {
+      "evalId": "boundary_cross_project_spoke_filtering",
+      "conversation": [
+        {
+          "invocationId": "",
+          "userContent": {
+            "parts": [
+              {
+                "text": "In my management project agent-registry-demo-1, is there a --boundary flag on gcloud agent-registry, and how do I list or search only the agents that were discovered from spoke project 220378623452 in us-central1?"
+              }
+            ]
+          },
+          "finalResponse": {
+            "parts": [
+              {
+                "text": "Explains that there is no `--boundary` filter on Agent Registry queries because all attached boundaries aggregate into the management project, and shows how to narrow results to spoke project `220378623452` using `gcloud agent-registry agents list --project=agent-registry-demo-1 --location=us-central1 --filter=\"agentId:220378623452\"` or `gcloud agent-registry agents search --project=agent-registry-demo-1 --location=us-central1 --search-string='agentId:\"urn:agent:projects-220378623452*\"'`."
+              }
+            ]
+          },
+          "creationTimestamp": 0.0
+        }
+      ],
+      "sessionInput": {
+        "appName": "agent-registry",
+        "userId": "eval_user",
+        "state": {}
+      },
+      "creationTimestamp": 0.0,
+      "finalSessionState": {}
+    },
+    {
+      "evalId": "boundary_move_project_tag_rebinding_guardrail",
+      "conversation": [
+        {
+          "invocationId": "",
+          "userContent": {
+            "parts": [
+              {
+                "text": "How do I move member project 220378623452 from our dev boundary (975672035171/environment/dev) to our prod boundary (975672035171/environment/prod)?"
+              }
+            ]
+          },
+          "finalResponse": {
+            "parts": [
+              {
+                "text": "Warns that GCP Tags allow at most one value per tag key on a resource (so `tags bindings create` does not overwrite an existing binding and fails with `FAILED_PRECONDITION`), and provides the delete-then-create sequence: first `gcloud resource-manager tags bindings delete --tag-value=975672035171/environment/dev --parent=//cloudresourcemanager.googleapis.com/projects/220378623452`, then `gcloud resource-manager tags bindings create --tag-value=975672035171/environment/prod --parent=//cloudresourcemanager.googleapis.com/projects/220378623452`."
+              }
+            ]
+          },
+          "creationTimestamp": 0.0
+        }
+      ],
+      "sessionInput": {
+        "appName": "agent-registry",
+        "userId": "eval_user",
+        "state": {}
+      },
+      "creationTimestamp": 0.0,
+      "finalSessionState": {}
+    },
+    {
+      "evalId": "boundary_safe_teardown_and_audit",
+      "conversation": [
+        {
+          "invocationId": "",
+          "userContent": {
+            "parts": [
+              {
+                "text": "How do I audit all management projects in our organization and safely delete boundary agents-dev and capability config agent-governance under folder 849163983723?"
+              }
+            ]
+          },
+          "finalResponse": {
+            "parts": [
+              {
+                "text": "Shows `gcloud projects list --filter=\"isManagementProject=true\" --format=\"table(projectId, projectNumber, parent.id, configuredCapabilities)\"` for auditing, and enforces the required teardown order: (1) detach boundaries with `gcloud resource-manager capability-configs update agent-governance --folder=849163983723 --clear-boundaries`, (2) delete the boundary with `gcloud resource-manager boundaries delete agents-dev --folder=849163983723`, and (3) delete the capability config with `gcloud resource-manager capability-configs delete agent-governance --folder=849163983723`, noting that a BYO project is preserved (`isManagementProject=false`) while a Google-managed project is deleted."
+              }
+            ]
+          },
+          "creationTimestamp": 0.0
+        }
+      ],
+      "sessionInput": {
+        "appName": "agent-registry",
+        "userId": "eval_user",
+        "state": {}
+      },
+      "creationTimestamp": 0.0,
+      "finalSessionState": {}
+    },
+    {
+      "evalId": "boundary_iam_roles_and_permissions",
+      "conversation": [
+        {
+          "invocationId": "",
+          "userContent": {
+            "parts": [
+              {
+                "text": "What IAM roles and permissions do I need to create a Boundary, a CapabilityConfig with an existing project as the Management Project, configure BoundaryConfig, and bind tags to member projects?"
+              }
+            ]
+          },
+          "finalResponse": {
+            "parts": [
+              {
+                "text": "Details the required IAM roles and target resources: (1) `roles/resourcemanager.editor` on the parent Folder or Organization (granting `resourcemanager.capabilityConfigs.{create,get,update,delete,list}`, `resourcemanager.boundaries.{create,get,update,delete,list,associateToCapabilityConfig}`, `resourcemanager.boundaryConfigs.{get,update}`, and `resourcemanager.boundaryMembers.{get,list}`; noting there is no dedicated curated `boundaryAdmin` role), (2) `roles/owner` or `roles/editor` on the candidate Bring-Your-Own project (granting `resourcemanager.projects.associateToCapabilityConfig` when passing `--management-project=projects/<PROJECT_NUMBER>`), (3) `roles/resourcemanager.tagUser` on both the Tag Value and each target project (`resourcemanager.tagValues.use`, `resourcemanager.tagValueBindings.{create,delete}`) to bind/unbind tags, and (4) `roles/agentregistry.admin` / `roles/agentregistry.viewer` on the Management Project (Hub) to manage services/bindings and query the aggregated catalog."
+              }
+            ]
+          },
+          "creationTimestamp": 0.0
+        }
+      ],
+      "sessionInput": {
+        "appName": "agent-registry",
+        "userId": "eval_user",
+        "state": {}
+      },
+      "creationTimestamp": 0.0,
+      "finalSessionState": {}
+    },
+    {
+      "evalId": "python_adk_integration_mcp_and_a2a",
+      "conversation": [
+        {
+          "invocationId": "",
+          "userContent": {
+            "parts": [
+              {
+                "text": "How do I use the Google Agent Development Kit (ADK) in Python to connect an LlmAgent to an MCP server and a remote A2A sub-agent registered in Agent Registry?"
+              }
+            ]
+          },
+          "finalResponse": {
+            "parts": [
+              {
+                "text": "Uses `from google.adk.integrations.agent_registry import AgentRegistry` (referencing `references/adk-docs.md`), initializes `AgentRegistry(project_id=..., location=...)`, retrieves an `McpToolset` via `registry.get_mcp_toolset(...)` for `LlmAgent(tools=[...])`, and retrieves a remote A2A agent via `registry.get_remote_a2a_agent(...)` for `sub_agents=[...]`."
+              }
+            ]
+          },
+          "creationTimestamp": 0.0
+        }
+      ],
+      "sessionInput": {
+        "appName": "agent-registry",
+        "userId": "eval_user",
+        "state": {}
+      },
+      "creationTimestamp": 0.0,
+      "finalSessionState": {}
+    }
+  ],
+  "creation_timestamp": 0.0
+}

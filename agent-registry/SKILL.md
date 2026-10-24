@@ -4,9 +4,11 @@ description: >
   Use this skill whenever the user wants to interact with Google Cloud's Agent Registry
   using gcloud commands. Triggers on any mention of "agent registry", "agent-registry",
   "mcp-servers", "gcloud agents", "register an agent", "list agents", "create a service",
-  "agent service", or any request to manage agents, MCP servers, endpoints, or services
-  in Google Cloud Agent Registry. Also triggers on requests to integrate or use the
-  Google Agent Development Kit (ADK) with the Agent Registry.
+  "agent service", "management boundary", "boundary", "boundary-configs", "boundaries",
+  "capability-configs", "capability config", "management project", or any request to
+  manage agents, MCP servers, endpoints, services, bindings, skills, or management
+  boundaries in Google Cloud Agent Registry. Also triggers on requests to integrate or
+  use the Google Agent Development Kit (ADK) with the Agent Registry.
 metadata:
   author: srinandan
   version: "0.1"
@@ -14,7 +16,7 @@ metadata:
 
 # Google Cloud Agent Registry Skill
 
-Help users interact with Google Cloud Agent Registry using `gcloud agent-registry` (GA resources: agents, mcp-servers, services, endpoints, bindings, operations) and `gcloud alpha agent-registry skills` (Alpha feature: skills and skill revisions) by translating natural language into the correct gcloud command, showing it for approval, then executing it.
+Help users interact with Google Cloud Agent Registry using `gcloud agent-registry` (GA resources: agents, mcp-servers, services, endpoints, bindings, operations), `gcloud alpha agent-registry skills` (Alpha feature: skills and skill revisions), and `gcloud resource-manager` (`boundary-configs`, `capability-configs`, `boundaries`, and `tags bindings` for setting up Agent Registry management boundaries) by translating natural language into the correct gcloud command, showing it for approval, then executing it.
 
 ## Workflow
 
@@ -55,6 +57,10 @@ gcloud config set api_endpoint_overrides/agentregistry https://agentregistry.goo
 | `roles/agentregistry.admin` | Full administrative access |
 | `roles/agentregistry.editor` | Editor access |
 | `roles/agentregistry.viewer` | Read only access |
+| `roles/resourcemanager.editor` | Create and update `BoundaryConfig`, `CapabilityConfig`, and `Boundary` on the parent folder or organization |
+| `roles/resourcemanager.viewer` | Read `BoundaryConfig`, `CapabilityConfig`, and `Boundary` resources |
+| `roles/resourcemanager.tagUser` | Bind tag values (`tags bindings create/delete`) to projects |
+| `roles/owner` or `roles/editor` | Required on a candidate Bring-Your-Own project to associate it as a Management Project |
 
 ---
 
@@ -67,7 +73,7 @@ Used to register Model Context Protocol servers.
 
 ```bash
 # Register an MCP Server (example: GitHub)
-# Ask user to paste contents of mcp-spec.json for --mcp-server-spec-content
+# Ask user to paste contents of mcp-spec.json for --mcp-server-spec-content and show this command template for approval:
 gcloud agent-registry services create github \
   --location=us-central1 \
   --display-name="GitHub MCP Server" \
@@ -101,7 +107,7 @@ gcloud agent-registry services create salesforce \
   --interfaces='[{"protocolBinding": "http-json", "url": "https://api.salesforce.com/agent/v1"}]'
 
 # Register an A2A Agent (Special Case)
-# Ask user to paste contents of agent_card.json for --agent-spec-content
+# Ask user to paste contents of agent_card.json for --agent-spec-content and show this command template for approval:
 gcloud agent-registry services create testa2a \
   --location=us-central1 \
   --display-name="Test A2A Agent" \
@@ -182,13 +188,30 @@ gcloud agent-registry bindings delete BINDING_NAME --location=us-central1
 ```
 
 ### 6. Skills (Alpha)
-Used to manage reusable AI Skills and Skill Revisions.
+Used to manage reusable AI Skills and Skill Revisions via the **`agentregistry` MCP server tools** (preferred when the MCP server is available) or `gcloud alpha agent-registry skills` CLI commands.
 
 > [!IMPORTANT]
-> **Supported Locations for Skills:** Skills only work in `"global"`, `"us"`, or `"eu"` regions. If the user asks for something else (e.g. `us-central1`), **do not pass that region to the `gcloud` command**. Instead, inform the user that Skills are only supported in `global`, `us`, or `eu` regions and ask them to select one of those locations.
+> **Supported Locations for Skills:** Skills only work in `"global"`, `"us"`, or `"eu"` regions. If the user asks for something else (e.g. `us-central1`), **do not pass that region to the MCP tool or `gcloud` command**. Instead, inform the user that Skills are only supported in `global`, `us`, or `eu` regions and ask them to select one of those locations.
 
 > [!NOTE]
-> The **Skills** feature is currently in **alpha** and must be executed via `gcloud alpha agent-registry skills`. Skills are not available through MCP.
+> All Skills and Skill Revisions CRUD, list, and search operations are supported through the `agentregistry` MCP server as well as `gcloud alpha agent-registry skills`. Downloading a skill revision archive payload to disk uses `gcloud alpha agent-registry skills revisions download`. As with CLI commands, execute read-only MCP calls (`list_skills`, `get_skill`, `search_skills`, `list_skill_revisions`, `get_skill_revision`) immediately, and ask for user approval before invoking mutating MCP tools (`create_skill`, `update_skill`, `delete_skill`, `create_skill_revision`, `delete_skill_revision`).
+
+#### MCP Tools for Skills & Skill Revisions (`agentregistry` MCP Server)
+
+| Operation | MCP Tool (`agentregistry`) | Key Arguments |
+|-----------|----------------------------|---------------|
+| **List Skills** | `mcp_agentregistry_list_skills` | `parent`: `projects/{project}/locations/{location}` (`global`, `us`, or `eu`); optional `filter`, `orderBy`, `pageSize`, `pageToken` |
+| **Get Skill** | `mcp_agentregistry_get_skill` | `name`: `projects/{project}/locations/{location}/skills/{skill}` |
+| **Create Skill** | `mcp_agentregistry_create_skill` | `parent`: `projects/{project}/locations/{location}`, `skillId`, `skill`: `{displayName, type: "SIMPLE", targetState: "TARGET_STATE_DRAFT" \| "TARGET_STATE_ACTIVE", description, defaultRevision, scanningConfig, publisher}` |
+| **Update Skill** | `mcp_agentregistry_update_skill` | `skill`: `{name: "projects/.../skills/{skill}", displayName, description, targetState, defaultRevision, scanningConfig}`, optional `updateMask` |
+| **Delete Skill** | `mcp_agentregistry_delete_skill` | `name`: `projects/{project}/locations/{location}/skills/{skill}`, optional `force` (`true` to also delete revisions) |
+| **Search Skills** | `mcp_agentregistry_search_skills` | `parent`: `projects/{project}/locations/{location}`, `searchString`, `searchType` (`KEYWORD` or `SEMANTIC`), optional `filter` (e.g., `state=ACTIVE`) |
+| **List Revisions** | `mcp_agentregistry_list_skill_revisions` | `parent`: `projects/{project}/locations/{location}/skills/{skill}`, optional `pageSize`, `pageToken` |
+| **Get Revision** | `mcp_agentregistry_get_skill_revision` | `name`: `projects/{project}/locations/{location}/skills/{skill}/revisions/{revision}` |
+| **Create Revision** | `mcp_agentregistry_create_skill_revision` | `parent`: `projects/{project}/locations/{location}/skills/{skill}`, optional `skillRevisionId`, `skillRevision`: `{gcsSource: {uri: "gs://..."}}` or `{archiveUploadSource: {archiveContent: "<base64-bytes>"}}` |
+| **Delete Revision** | `mcp_agentregistry_delete_skill_revision` | `name`: `projects/{project}/locations/{location}/skills/{skill}/revisions/{revision}` |
+
+#### `gcloud` CLI Usage (`gcloud alpha agent-registry skills`)
 
 ```bash
 # List Skills
@@ -224,9 +247,211 @@ gcloud alpha agent-registry skills update my-skill \
 gcloud alpha agent-registry skills delete my-skill --location=us
 
 # Manage Skill Revisions (Alpha)
-gcloud alpha agent-registry skills revisions list --location=us
-gcloud alpha agent-registry skills revisions describe REVISION_ID --location=us
-gcloud alpha agent-registry skills revisions download REVISION_ID --location=us
+gcloud alpha agent-registry skills revisions list --skill=my-skill --location=us
+gcloud alpha agent-registry skills revisions describe REVISION_ID --skill=my-skill --location=us
+gcloud alpha agent-registry skills revisions download REVISION_ID --skill=my-skill --location=us
+gcloud alpha agent-registry skills revisions delete REVISION_ID --skill=my-skill --location=us
+```
+
+### 7. Management Boundary Setup (Admin Governance)
+Used by Agent Registry administrators to configure hub-and-spoke governance perimeters across a Google Cloud Folder or Organization using Cloud Resource Manager (`BoundaryConfig`, `CapabilityConfig`, `Boundary`, and Tag Bindings). When member (spoke) projects match a boundary's tag filter, Agent Registry automatically discovers runtime agents and MCP servers deployed across those member projects and aggregates them into the designated Management Project (hub) catalog.
+
+#### Resource Model Overview
+
+| Resource | CLI Command Group | Purpose |
+|----------|-------------------|---------|
+| **`BoundaryConfig`** | `gcloud resource-manager boundary-configs` | Singleton resource on a Folder or Organization node (`folders/{id}/boundaryConfig` or `organizations/{id}/boundaryConfig`) that specifies the single partitioning `tagKey` (e.g., `975672035171/environment`) used by all boundaries under that node. |
+| **`CapabilityConfig`** | `gcloud resource-manager capability-configs` | Designates a Management Project (hub) under the Folder or Organization, enables `--types=agent-management` (or `agent-management,app-management`), and associates one or more `Boundary` resources. |
+| **`Boundary`** | `gcloud resource-manager boundaries` | Logical perimeter under a Folder or Organization that selects child projects matching a specific tag value (`--tag-key` and `--tag-value`) and links to a `CapabilityConfig`. |
+| **Tag Bindings** | `gcloud resource-manager tags bindings` | Enrolls the Management Project and Member (Spoke) Projects into a boundary perimeter by binding the corresponding tag value (e.g., `975672035171/environment/dev`). |
+
+#### Required IAM Roles & Permissions for Boundary Setup
+
+Before running boundary provisioning commands, verify that the administrator holds the required IAM roles on the appropriate hierarchy nodes:
+
+| Role | Where to Grant (Target Resource) | Underlying Permissions | Purpose |
+|------|----------------------------------|------------------------|---------|
+| **`roles/resourcemanager.editor`** *(Resource Manager Editor)* | **Parent Folder or Organization** (`folders/FOLDER_ID` or `organizations/ORG_ID`) | • `resourcemanager.capabilityConfigs.{create,get,update,delete,list}`<br>• `resourcemanager.boundaries.{create,get,update,delete,list,associateToCapabilityConfig}`<br>• `resourcemanager.boundaryConfigs.{get,update}`<br>• `resourcemanager.boundaryMembers.{get,list}` | Create, update, link, and delete `CapabilityConfig`, `Boundary`, and singleton `BoundaryConfig` resources under the folder/org. *(Note: There is no dedicated curated `boundaryAdmin` role; these permissions ship inside `roles/resourcemanager.editor` or a Custom Role.)* |
+| **`roles/resourcemanager.viewer`** *(Resource Manager Viewer)* | **Parent Folder or Organization** (`folders/FOLDER_ID` or `organizations/ORG_ID`) | • `resourcemanager.capabilityConfigs.{get,list}`<br>• `resourcemanager.boundaries.{get,list}`<br>• `resourcemanager.boundaryConfigs.get`<br>• `resourcemanager.boundaryMembers.{get,list}` | Read-only inspection of boundary configurations, capability configs, boundaries, and effective boundary members. |
+| **`roles/owner`** or **`roles/editor`** *(Project Owner / Editor)* | **Candidate Bring-Your-Own Management Project** (`projects/PROJECT_NUMBER`) | • `resourcemanager.projects.associateToCapabilityConfig` | Required on an existing project when designating it as a Management Project via `--management-project=projects/<PROJECT_NUMBER>` on `capability-configs create`. (Not needed if Cloud Resource Manager auto-provisions a Google-managed project.) |
+| **`roles/resourcemanager.tagUser`** *(Tag User)* | **Both the Tag Value AND each Target Project** (Hub + Member Spoke Projects) | • `resourcemanager.tagValues.use`<br>• `resourcemanager.tagValueBindings.{create,delete}` | Required to attach or detach environment/perimeter tag bindings (`gcloud resource-manager tags bindings create/delete`) on projects. *(Creating new Tag Keys/Values requires `roles/resourcemanager.tagAdmin` on the Organization.)* |
+| **`roles/agentregistry.admin`** / **`roles/agentregistry.viewer`** | **Management Project (Hub)** (`projects/MGMT_PROJECT_ID`) | • `agentregistry.*` | `roles/agentregistry.admin` to centrally register `Services` and `Bindings` on the hub; `roles/agentregistry.viewer` to query (`list`, `describe`, `search`) the aggregated agent, MCP server, and skill catalog across the boundary. |
+
+> **Custom Role & IAM Notes:**
+> - All `resourcemanager.capabilityConfigs.*`, `resourcemanager.boundaries.*`, and `resourcemanager.boundaryConfigs.*` permissions support **IAM Custom Roles** and **IAM Deny** policies (`create` and `list` are checked as `parents_only` on the Folder or Organization).
+> - Note the permission resource noun for the singleton `boundaryConfig` is plural (`resourcemanager.boundaryConfigs.get` and `resourcemanager.boundaryConfigs.update`).
+> - Attaching a `Boundary` to a `CapabilityConfig` (`capability-configs update --add-boundaries`) checks both `resourcemanager.capabilityConfigs.update` and `resourcemanager.boundaries.associateToCapabilityConfig` on the parent node.
+
+#### Interactive Scoping Questions for Admins (Ask Before Provisioning)
+
+When an administrator asks to set up a Management Boundary or `CapabilityConfig`, **proactively ask these scoping questions** (skipping any details they have already provided) to design the right topology before constructing mutating commands:
+
+1. **Parent Hierarchy Node (Folder vs. Organization)**:
+   _"Which Folder ID (`--folder=FOLDER_ID`) or Organization ID (`--organization=ORG_ID`) will anchor the boundary and management project(s)?"_
+   *(Note: A `CapabilityConfig`, its Management Project, and all associated `Boundary` resources must share the exact same parent node.)*
+2. **Perimeter Partitioning & Tag Key Strategy**:
+   _"How do you want to partition projects under this node? Do you want multiple isolated perimeters using an Organization Tag Key (for example, `<ORG_ID>/environment` with values like `dev` and `prod`, or partitioning by business unit), or a single catch-all boundary covering all child projects?"_
+3. **Catalog & IAM Isolation (`1 Hub per Perimeter` vs. `Shared Hub`)**:
+   _"If you have multiple perimeters (such as `dev` and `prod`), do you want **strict catalog and IAM isolation** with a dedicated Management Project and `CapabilityConfig` per perimeter (recommended so `prod` agents never appear in `dev` queries and vice versa), or should multiple boundaries roll up into a single shared Management Project?"_
+4. **Management Project Selection (Bring-Your-Own vs. Google-Managed)**:
+   _"Do you want to designate existing project(s) under that parent node as your Management Project(s) (`--management-project=projects/<PROJECT_NUMBER>`), or have Cloud Resource Manager auto-provision a new Google-managed Management Project (by omitting `--management-project`)?"_
+5. **Capability Types (`agent-management` vs. Shared with App Hub)**:
+   _"Should the `CapabilityConfig` enable `agent-management` only, or both `agent-management,app-management` (to share the Management Project with App Hub)?"_
+6. **Member (Spoke) Projects**:
+   _"Which project IDs or project numbers should be enrolled into each boundary perimeter via tag bindings?"_
+
+#### Best Practices & Architectural Guardrails
+
+Always share relevant best practices with the admin as you guide them through setup:
+
+- **Set `BoundaryConfig` Tag Key Before Attaching Boundaries**: Configure the partitioning `tagKey` (`gcloud resource-manager boundary-configs update`) *before* creating and attaching boundaries. Once any boundary under the node is attached to a `CapabilityConfig`, Cloud Resource Manager locks `tagKey` on that node (requiring all boundaries to be detached before `tagKey` can be changed). If `tagKey` is left unset, the node supports at most one filter-less boundary that matches every child project under the node.
+- **Use Separate `CapabilityConfig` + Management Project for Strict `dev`/`prod` Isolation**: Every boundary attached to the same `CapabilityConfig` merges its discovered agents and MCP servers into one Management Project catalog. There is no `--boundary` filter on `gcloud agent-registry` queries, and granting `roles/agentregistry.viewer` on a Management Project exposes assets from all boundaries attached to it. To guarantee zero cross-perimeter leakage between environments (e.g., `dev` vs. `prod`), create a separate `CapabilityConfig`, Management Project, and `Boundary` for each environment.
+- **Always Use Project Numbers (`projects/<PROJECT_NUMBER>`)**: Cloud Resource Manager v3 requires project **numbers** (not project IDs) for `--management-project=projects/<PROJECT_NUMBER>` on `capability-configs create` and `--parent=//cloudresourcemanager.googleapis.com/projects/<PROJECT_NUMBER>` on `tags bindings create`. Automatically resolve project IDs to project numbers for the user with:
+  ```bash
+  gcloud projects describe PROJECT_ID --format="value(projectNumber)"
+  ```
+- **Tag Binding Updates Require Delete-Then-Create**: GCP Tags allow at most one value per tag key on a resource (`tags bindings create` fails with `FAILED_PRECONDITION` if another value under the same tag key is already bound). To move a project from `dev` to `prod`, first run `tags bindings delete` for the old value and then `tags bindings create` for the new value. Tag changes take ~2–7 minutes to fully propagate.
+- **Resource ID & Display Name Constraints**: `capability_config_id` and `boundary_id` must be 6–30 lowercase ASCII letters, digits, or hyphens, must start with a letter, and cannot end with a hyphen. `--display-name` must be 4–30 characters.
+- **Centralize Manual Registrations in the Hub (Spoke Governance)**: Automatic runtime discovery (e.g., Vertex AI Agent Engine / Reasoning Engine and GKE agents/MCP servers) works across spoke member projects even when `agentregistry.googleapis.com` is disabled on the spoke projects. However, user-defined `Services` (`gcloud agent-registry services create`) and `Bindings` created locally in a spoke project stay isolated to that spoke and **do not roll up** to the Management Project. Register third-party MCP servers, custom agents, endpoints, and bindings centrally in the Management Project, and consider disabling `agentregistry.googleapis.com` (or restricting `services.*` and `bindings.*` write permissions via IAM Deny / Org Policy `gcp.restrictServiceUsage`) on spoke workload projects.
+- **Follow Required Teardown Order**: Cloud Resource Manager blocks deleting an attached `Boundary` or a `CapabilityConfig` with attached boundaries. Always detach boundaries first (`gcloud resource-manager capability-configs update <ID> --folder=<FOLDER_ID> --clear-boundaries`), then delete the `Boundary`, and finally delete the `CapabilityConfig`. Deleting a `CapabilityConfig` preserves a Bring-Your-Own project (`isManagementProject` reverts to `false`), whereas a Google-managed Management Project is deleted.
+
+#### Step-by-Step Boundary Provisioning Workflow
+
+Below is the canonical end-to-end setup workflow (modeling a folder `849163983723` in organization `975672035171` partitioned by tag key `975672035171/environment` into isolated `dev` and `prod` management perimeters):
+
+**Step 1: Configure Folder/Org `BoundaryConfig` and Bind Tags to Projects**
+```bash
+# 1a. Inspect current BoundaryConfig on the folder (or --organization=ORG_ID)
+gcloud resource-manager boundary-configs describe --folder=849163983723
+
+# 1b. Configure folder BoundaryConfig with the organization environment tag key
+gcloud resource-manager boundary-configs update \
+  --folder=849163983723 \
+  --tag-key="975672035171/environment"
+
+# 1c. Bind environment=dev to the dev management hub and dev spoke projects (using project numbers)
+for pnum in 1066599796742 220378623452 553108137791; do
+  gcloud resource-manager tags bindings create \
+    --tag-value=975672035171/environment/dev \
+    --parent=//cloudresourcemanager.googleapis.com/projects/$pnum
+done
+
+# 1d. Bind environment=prod to the prod management hub and prod spoke projects (using project numbers)
+for pnum in 592695869630 455819280907 868507208815; do
+  gcloud resource-manager tags bindings create \
+    --tag-value=975672035171/environment/prod \
+    --parent=//cloudresourcemanager.googleapis.com/projects/$pnum
+done
+```
+
+**Step 2: Create `CapabilityConfig` Resources (Designate Management Projects)**
+```bash
+# Create folder-scoped CapabilityConfig for the dev management project
+gcloud resource-manager capability-configs create agent-governance \
+  --folder=849163983723 \
+  --display-name="Agent Governance Capability" \
+  --types=agent-management \
+  --management-project=projects/1066599796742
+
+# Create folder-scoped CapabilityConfig for the prod management project
+gcloud resource-manager capability-configs create agent-governance-prod \
+  --folder=849163983723 \
+  --display-name="Agent Governance Capability" \
+  --types=agent-management \
+  --management-project=projects/592695869630
+```
+
+**Step 3: Create `Boundary` Resources**
+```bash
+# Create dev and prod Boundaries on the parent folder
+gcloud resource-manager boundaries create agents-dev \
+  --folder=849163983723 \
+  --display-name="Agent Dev Boundary" \
+  --tag-key="975672035171/environment" \
+  --tag-value="dev"
+
+gcloud resource-manager boundaries create agents-prod \
+  --folder=849163983723 \
+  --display-name="Agent Prod Boundary" \
+  --tag-key="975672035171/environment" \
+  --tag-value="prod"
+```
+
+**Step 4: Associate Each `Boundary` with Its `CapabilityConfig`**
+```bash
+# Associate agents-dev boundary with the dev CapabilityConfig
+gcloud resource-manager capability-configs update agent-governance \
+  --folder=849163983723 \
+  --boundaries=folders/849163983723/boundaries/agents-dev
+
+# Associate agents-prod boundary with the prod CapabilityConfig
+gcloud resource-manager capability-configs update agent-governance-prod \
+  --folder=849163983723 \
+  --boundaries=folders/849163983723/boundaries/agents-prod
+```
+
+**Step 5: Verify Cross-Project Rollup, Filtering, and Search on the Management Project**
+```bash
+# List all discovered agents aggregated across member projects in the boundary
+gcloud agent-registry agents list --project=MANAGEMENT_PROJECT_ID --location=us-central1
+
+# List multi-region and global agents aggregated in the management project
+gcloud agent-registry agents list --project=MANAGEMENT_PROJECT_ID --location=global
+gcloud agent-registry agents list --project=MANAGEMENT_PROJECT_ID --location=us
+
+# Filter aggregated agents by runtime (Vertex AI Reasoning Engine) across all member projects
+gcloud agent-registry agents list --project=MANAGEMENT_PROJECT_ID --location=us-central1 \
+  --filter='attributes."agentregistry.googleapis.com/system/RuntimeReference".uri:reasoningEngine'
+
+# Narrow aggregated agents to a specific spoke project number via agentId or RuntimeIdentity
+gcloud agent-registry agents list --project=MANAGEMENT_PROJECT_ID --location=us-central1 \
+  --filter="agentId:220378623452"
+
+gcloud agent-registry agents list --project=MANAGEMENT_PROJECT_ID --location=us-central1 \
+  --filter='attributes."agentregistry.googleapis.com/system/RuntimeIdentity".principal:service-553108137791'
+
+# Search aggregated agents across spoke projects by displayName prefix, spoke URN prefix, or A2A skills
+gcloud agent-registry agents search --project=MANAGEMENT_PROJECT_ID --location=us-central1 \
+  --search-string="displayName:Aegis*"
+
+gcloud agent-registry agents search --project=MANAGEMENT_PROJECT_ID --location=us-central1 \
+  --search-string='agentId:"urn:agent:projects-553108137791*"'
+
+gcloud agent-registry agents search --project=MANAGEMENT_PROJECT_ID --location=us-central1 \
+  --search-string="skills.tags:fintech"
+
+gcloud agent-registry agents search --project=MANAGEMENT_PROJECT_ID --location=us-central1 \
+  --search-string="Clinical OR Pharmacovigilance"
+```
+
+**Step 6: Audit, Reassign, or Tear Down Boundaries**
+```bash
+# List and describe CapabilityConfigs and Boundaries under a folder
+gcloud resource-manager capability-configs list --folder=FOLDER_ID
+gcloud resource-manager capability-configs describe CAPABILITY_CONFIG_ID --folder=FOLDER_ID
+gcloud resource-manager boundaries list --folder=FOLDER_ID
+gcloud resource-manager boundaries describe BOUNDARY_ID --folder=FOLDER_ID
+
+# Audit all Agent Registry management projects across the organization
+gcloud projects list \
+  --filter="isManagementProject=true" \
+  --format="table(projectId, projectNumber, parent.id, configuredCapabilities)"
+
+# Move a member project from dev to prod (delete old binding first, then create new binding)
+gcloud resource-manager tags bindings delete \
+  --tag-value=975672035171/environment/dev \
+  --parent=//cloudresourcemanager.googleapis.com/projects/PROJECT_NUMBER
+
+gcloud resource-manager tags bindings create \
+  --tag-value=975672035171/environment/prod \
+  --parent=//cloudresourcemanager.googleapis.com/projects/PROJECT_NUMBER
+
+# Detach boundaries before deleting a Boundary or CapabilityConfig
+gcloud resource-manager capability-configs update CAPABILITY_CONFIG_ID \
+  --folder=FOLDER_ID \
+  --clear-boundaries
+gcloud resource-manager boundaries delete BOUNDARY_ID --folder=FOLDER_ID
+gcloud resource-manager capability-configs delete CAPABILITY_CONFIG_ID --folder=FOLDER_ID
 ```
 
 ## Agent Dashboard
@@ -280,7 +505,7 @@ The output will be a Markdown table containing the following fields:
 
 ## Detailed Command Reference
 
-All commands support `--location` (required) and `--project` (optional).
+All `gcloud agent-registry` commands support `--location` (required) and `--project` (optional). Cloud Resource Manager boundary governance commands (`gcloud resource-manager`) are scoped to `--folder` or `--organization`.
 
 | Group | Commands | API Stage |
 |-------|----------|-----------|
@@ -290,8 +515,12 @@ All commands support `--location` (required) and `--project` (optional).
 | `services` | `create`, `list`, `describe`, `update`, `delete` | GA |
 | `bindings` | `create`, `list`, `describe`, `update`, `delete` | GA |
 | `operations` | `list`, `describe` | GA |
-| `skills` | `create`, `list`, `describe`, `update`, `delete`, `search` | Alpha (`gcloud alpha agent-registry skills`) |
-| `skills revisions` | `create`, `list`, `describe`, `delete`, `download` | Alpha (`gcloud alpha agent-registry skills revisions`) |
+| `skills` | `create`, `list`, `describe`, `update`, `delete`, `search` | Alpha (`agentregistry` MCP tools + `gcloud alpha agent-registry skills`) |
+| `skills revisions` | `create`, `list`, `describe`, `delete`, `download` | Alpha (`agentregistry` MCP tools + `gcloud alpha agent-registry skills revisions`) |
+| `boundary-configs` | `describe`, `update` | GA (`gcloud resource-manager boundary-configs`) |
+| `capability-configs` | `create`, `list`, `describe`, `update`, `delete` | GA (`gcloud resource-manager capability-configs`) |
+| `boundaries` | `create`, `list`, `describe`, `update`, `delete` | GA (`gcloud resource-manager boundaries`) |
+| `tags bindings` | `create`, `list`, `delete` | GA (`gcloud resource-manager tags bindings`) |
 
 ### Service Creation Flags
 
@@ -346,6 +575,15 @@ All commands support `--location` (required) and `--project` (optional).
 | "List all skills" | `gcloud alpha agent-registry skills list --location=us` |
 | "Show details of skill my-skill" | `gcloud alpha agent-registry skills describe my-skill --location=us` |
 | "Search skills matching query" | `gcloud alpha agent-registry skills search --location=us --query="QUERY"` |
+| "Configure folder 849163983723 boundary config to use environment tag" | `gcloud resource-manager boundary-configs update --folder=849163983723 --tag-key="975672035171/environment"` |
+| "Create a capability config for agent management on folder 849163983723" | `gcloud resource-manager capability-configs create agent-governance --folder=849163983723 --display-name="Agent Governance Capability" --types=agent-management --management-project=projects/1066599796742` |
+| "Create a dev boundary under folder 849163983723 for environment=dev" | `gcloud resource-manager boundaries create agents-dev --folder=849163983723 --display-name="Agent Dev Boundary" --tag-key="975672035171/environment" --tag-value="dev"` |
+| "Associate boundary agents-dev with capability config agent-governance" | `gcloud resource-manager capability-configs update agent-governance --folder=849163983723 --boundaries=folders/849163983723/boundaries/agents-dev` |
+| "Bind tag environment=dev to project 220378623452" | `gcloud resource-manager tags bindings create --tag-value=975672035171/environment/dev --parent=//cloudresourcemanager.googleapis.com/projects/220378623452` |
+| "List all boundaries under folder 849163983723" | `gcloud resource-manager boundaries list --folder=849163983723` |
+| "List all capability configs under folder 849163983723" | `gcloud resource-manager capability-configs list --folder=849163983723` |
+| "Filter aggregated agents in management project by spoke project number 220378623452" | `gcloud agent-registry agents list --project=MANAGEMENT_PROJECT_ID --location=us-central1 --filter="agentId:220378623452"` |
+| "Search aggregated agents by skill tag fintech" | `gcloud agent-registry agents search --project=MANAGEMENT_PROJECT_ID --location=us-central1 --search-string="skills.tags:fintech"` |
 
 ---
 
@@ -418,7 +656,7 @@ You can search for agents using the `gcloud agent-registry agents search` comman
 
 ### Searchable Fields & Examples
 
-You can search across fields such as `agentId`, `displayName`, `skills.name`, `skills.id`, and `skills.description`. Note that values containing colons (like URNs) must be escaped.
+You can search across fields such as `agentId`, `displayName`, `skills.name`, `skills.id`, `skills.tags`, and `skills.description`, as well as boolean `OR` / `AND` keyword expressions. Note that values containing colons (like URNs) must be escaped, and wildcard `*` is not supported on `skills.description` (use token match `:` instead).
 
 ```bash
 # Search for agents by agentId (urn) with prefix match
@@ -437,9 +675,17 @@ gcloud agent-registry agents search --location=us-east4 \
 gcloud agent-registry agents search --location=us-east4 \
   --search-string="skills.id:AssessorAgent"
 
-# Search for agents by skill description
-gcloud agent-registry agents search --location=us-east4 \
-  --search-string="skills.description:severity*"
+# Search for agents by skill tag
+gcloud agent-registry agents search --location=us-central1 \
+  --search-string="skills.tags:fintech"
+
+# Search for agents by skill description (token match; wildcard * is not supported on skills.description)
+gcloud agent-registry agents search --location=us-central1 \
+  --search-string="skills.description:MedDRA"
+
+# Search for agents using boolean OR keyword matching
+gcloud agent-registry agents search --location=us-central1 \
+  --search-string="Clinical OR Pharmacovigilance"
 ```
 
 ---
@@ -475,12 +721,18 @@ gcloud agent-registry mcp-servers search --location=us-east4 \
 
 ## Searching Skills (Alpha)
 
-> [!NOTE]
-> Skills are not yet available through MCP. To search for Skills, run the `gcloud alpha agent-registry skills search` CLI command. **Remember:** Skills only work in `"global"`, `"us"`, or `"eu"` regions.
+When searching for skills, **always default to using the `mcp_agentregistry_search_skills` MCP tool** if the `agentregistry` MCP server is available. Use the `gcloud alpha agent-registry skills search` command as a fallback. **Remember:** Skills only work in `"global"`, `"us"`, or `"eu"` regions.
 
-### gcloud Usage
+### MCP Tool Usage (`mcp_agentregistry_search_skills`)
 
-Search skills using keyword or semantic search:
+- **`parent`**: `projects/{project}/locations/{location}` (where `{location}` is `global`, `us`, or `eu`)
+- **`searchString`**: Search expression across `skillId`, `name`, `displayName`, `description`, `frontmatter.name`, `frontmatter.description`, `frontmatter.compatibility`, and `frontmatter.license` (supports `=`, `:`, `*`, `AND`, `OR`, `NOT`), or a natural-language query when `searchType` is `SEMANTIC`.
+- **`searchType`**: `KEYWORD` or `SEMANTIC`.
+- **`filter`**: Optional filter expression on `state`, `targetState`, `createTime`, or `updateTime` (e.g., `state=ACTIVE`).
+
+### gcloud Fallback Usage
+
+Search skills using keyword or semantic search via `gcloud alpha agent-registry skills search`:
 
 ```bash
 # Keyword search across searchable fields
@@ -515,9 +767,10 @@ For comprehensive details on how to build, deploy, or configure agents using Goo
 Only ask if still missing after checking session context:
 - **location**: "Which region? (e.g. `us-central1`)" — only if `compute/region` was not set. **Note for Skills:** Skills only work in `"global"`, `"us"`, or `"eu"` regions. If the user asks for a Skill in any other region, **do not pass that region to the gcloud command**. Inform the user that Skills are only supported in `global`, `us`, or `eu` regions and ask them to select one of those options.
 - **project**: "Which project?" — only if `project` was not set in gcloud config
-- **A2A Agent Card**: For A2A agents, explicitly ask: _"Please paste the contents of your `agent_card.json` file."_ and use it for `--agent-spec-content`.
-- **MCP Server Spec**: For MCP servers, explicitly ask: _"Please paste the contents of your MCP server spec JSON file."_ and use it for `--mcp-server-spec-content`.
+- **A2A Agent Card**: For A2A agents, if the user has not pasted the JSON yet, explicitly ask: _"Please paste the contents of your `agent_card.json` file."_ and always preview the `gcloud agent-registry services create` command template in the same response using `'PASTE_AGENT_CARD_JSON_HERE'` for `--agent-spec-content`.
+- **MCP Server Spec**: For MCP servers, if the user has not pasted the JSON yet, explicitly ask: _"Please paste the contents of your MCP server spec JSON file."_ and always preview the `gcloud agent-registry services create` command template in the same response using `'PASTE_MCP_SPEC_JSON_HERE'` for `--mcp-server-spec-content`.
 - **GKE Deployments**: Ask for the target path (current folder, specific folder, or file) and the functional type (`AGENT` or `MCP_SERVER`).
+- **Management Boundary Setup (`boundary-configs`, `capability-configs`, `boundaries`)**: Ask for the parent Folder ID (`--folder`) or Organization ID (`--organization`), how they want to partition perimeters (e.g., tag key `<ORG_ID>/environment` with values `dev`/`prod` vs. single boundary), whether each perimeter should have its own dedicated Management Project and `CapabilityConfig` (recommended for strict `dev`/`prod` catalog and IAM isolation) or share one hub, which project(s) to designate as Management Project(s) (resolving project IDs to project numbers `projects/<PROJECT_NUMBER>`), whether `--types` should be `agent-management` or `agent-management,app-management`, and which member projects to enroll via tag bindings.
 
 Only ask for what's strictly needed — don't overwhelm the user.
 
