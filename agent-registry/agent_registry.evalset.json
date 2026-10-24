@@ -812,6 +812,96 @@
       },
       "creationTimestamp": 0.0,
       "finalSessionState": {}
+    },
+    {
+      "evalId": "ai_applications_list_get_search_and_subresources",
+      "conversation": [
+        {
+          "invocationId": "",
+          "userContent": {
+            "parts": [
+              {
+                "text": "How do I list, describe, and search AI applications in us-central1, and how do I list the agents and MCP servers scoped to the default AI application?"
+              }
+            ]
+          },
+          "finalResponse": {
+            "parts": [
+              {
+                "text": "Presents the `agentregistry` MCP tools (`mcp_agentregistry_list_ai_applications`, `mcp_agentregistry_get_ai_application`, `mcp_agentregistry_list_ai_application_agents`, `mcp_agentregistry_list_ai_application_mcp_servers`) alongside the `gcloud agent-registry ai-applications` commands: `gcloud agent-registry ai-applications list --location=us-central1`, `gcloud agent-registry ai-applications describe default --location=us-central1`, `gcloud agent-registry ai-applications search --location=us-central1 --search-string=\"...\"` (or `--filter`), and child resource commands `gcloud agent-registry ai-applications agents list --ai-application=default --location=us-central1` and `gcloud agent-registry ai-applications mcp-servers list --ai-application=default --location=us-central1`."
+              }
+            ]
+          },
+          "creationTimestamp": 0.0
+        }
+      ],
+      "sessionInput": {
+        "appName": "agent-registry",
+        "userId": "eval_user",
+        "state": {}
+      },
+      "creationTimestamp": 0.0,
+      "finalSessionState": {}
+    },
+    {
+      "evalId": "ai_applications_iam_policy_management",
+      "conversation": [
+        {
+          "invocationId": "",
+          "userContent": {
+            "parts": [
+              {
+                "text": "How do I get the IAM policy on AI application my-ai-app in us-central1, grant group:ai-team@example.com the roles/agentregistry.viewer role on that AI application, or replace its IAM policy from policy.yaml?"
+              }
+            ]
+          },
+          "finalResponse": {
+            "parts": [
+              {
+                "text": "Provides the read-only command `gcloud agent-registry ai-applications get-iam-policy my-ai-app --location=us-central1` (requiring `agentregistry.googleapis.com/aiApplications.getIamPolicy`) and the mutating commands `gcloud agent-registry ai-applications add-iam-policy-binding my-ai-app --location=us-central1 --member=\"group:ai-team@example.com\" --role=\"roles/agentregistry.viewer\"` and `gcloud agent-registry ai-applications set-iam-policy my-ai-app policy.yaml --location=us-central1` (requiring `agentregistry.googleapis.com/aiApplications.setIamPolicy`, granted via `roles/agentregistry.admin`, and requesting user confirmation before executing mutating IAM policy updates)."
+              }
+            ]
+          },
+          "creationTimestamp": 0.0
+        }
+      ],
+      "sessionInput": {
+        "appName": "agent-registry",
+        "userId": "eval_user",
+        "state": {}
+      },
+      "creationTimestamp": 0.0,
+      "finalSessionState": {}
+    },
+    {
+      "evalId": "skills_iam_policy_management",
+      "conversation": [
+        {
+          "invocationId": "",
+          "userContent": {
+            "parts": [
+              {
+                "text": "How do I view and set the IAM policy on a specific skill my-skill in the us region, or bind user:alice@example.com to roles/agentregistry.viewer on that skill?"
+              }
+            ]
+          },
+          "finalResponse": {
+            "parts": [
+              {
+                "text": "Provides the read-only command `gcloud alpha agent-registry skills get-iam-policy my-skill --location=us` (requiring `agentregistry.googleapis.com/skills.getIamPolicy`) and the mutating commands `gcloud alpha agent-registry skills add-iam-policy-binding my-skill --location=us --member=\"user:alice@example.com\" --role=\"roles/agentregistry.viewer\"` and `gcloud alpha agent-registry skills set-iam-policy my-skill policy.yaml --location=us` (requiring `agentregistry.googleapis.com/skills.setIamPolicy`, granted via `roles/agentregistry.admin`, and requesting user confirmation before executing mutating IAM policy updates)."
+              }
+            ]
+          },
+          "creationTimestamp": 0.0
+        }
+      ],
+      "sessionInput": {
+        "appName": "agent-registry",
+        "userId": "eval_user",
+        "state": {}
+      },
+      "creationTimestamp": 0.0,
+      "finalSessionState": {}
     }
   ],
   "creation_timestamp": 0.0

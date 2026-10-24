@@ -9,12 +9,14 @@ A skill for the Gemini CLI and AI agents to interact with Google Cloud's Agent R
 ## Features
 
 - **Automated Authentication**: Helps with `gcloud auth login` and project configuration.
-- **Resource Management**: Create, list, describe, and delete Agents, MCP Servers, Endpoints, Services, Bindings, and Skills (Alpha).
-- **Smart Approvals**: Executes read-only commands (`list`, `describe`) immediately, while requesting approval for mutating commands (`create`, `update`, `delete`).
+- **Resource Management**: Create, list, describe, search, and delete Agents, MCP Servers, Endpoints, Services, Bindings, AI Applications (`ai-applications` and their child `agents`, `mcp-servers`, and `endpoints`), and Skills (Alpha).
+- **Resource-Level IAM Policies**: View and manage IAM policies (`get-iam-policy`, `set-iam-policy`, `add-iam-policy-binding`, `remove-iam-policy-binding`) on individual AI Applications (`ai-applications`) and Skills (`skills`).
+- **Smart Approvals**: Executes read-only commands (`list`, `describe`, `search`, `get-iam-policy`) immediately, while requesting approval for mutating commands (`create`, `update`, `delete`, `set-iam-policy`, `add-iam-policy-binding`, `remove-iam-policy-binding`).
 - **Rich Examples**: Built-in support for registering common resources like GitHub MCP Servers, Salesforce Agents, and Vertex AI Model Garden endpoints.
 - **Python ADK Integration**: Specialized support and snippets for the Google Agent Development Kit (ADK).
 - **GKE Based Agents**: Support for configuring Kubernetes Deployments to act as Agents or MCP Servers.
-- **Skills Management**: Built-in support for exploring and managing Skills and Skill Revisions via the `agentregistry` MCP server tools (`list_skills`, `get_skill`, `create_skill`, `update_skill`, `delete_skill`, `search_skills`, `list_skill_revisions`, `get_skill_revision`, `create_skill_revision`, `delete_skill_revision`) and `gcloud alpha agent-registry skills`.
+- **Skills Management**: Built-in support for exploring and managing Skills, Skill Revisions, and Skill IAM policies via the `agentregistry` MCP server tools (`list_skills`, `get_skill`, `create_skill`, `update_skill`, `delete_skill`, `search_skills`, `list_skill_revisions`, `get_skill_revision`, `create_skill_revision`, `delete_skill_revision`) and `gcloud alpha agent-registry skills` (including `get-iam-policy`, `set-iam-policy`, `add-iam-policy-binding`, `remove-iam-policy-binding`).
+- **AI Applications Management**: Built-in support for listing, describing, searching, creating, updating, and deleting AI Applications (`ai-applications`), managing child `agents`, `mcp-servers`, and `endpoints` via the `agentregistry` MCP server (`list_ai_applications`, `get_ai_application`, `list_ai_application_agents`, `get_ai_application_agent`, `list_ai_application_mcp_servers`, `get_ai_application_mcp_server`, `list_ai_application_endpoints`, `get_ai_application_endpoint`) and `gcloud agent-registry ai-applications`, and setting resource-level IAM policies (`get-iam-policy`, `set-iam-policy`, `add-iam-policy-binding`, `remove-iam-policy-binding`).
 - **Management Boundary Governance**: Interactive guidance and best practices for Agent Registry administrators to configure hub-and-spoke perimeters (`BoundaryConfig`, `CapabilityConfig`, `Boundary`, and Tag Bindings) and verify cross-project agent discovery.
 
 ## Installation
@@ -40,6 +42,9 @@ Once installed, you can talk to Gemini in natural language:
 -   *"List agents based on reasoning engine in us-central1"*
 -   *"Help me set up a management boundary for dev and prod under folder 849163983723"*
 -   *"Create a capability config and boundary for agent management"*
+-   *"List all AI applications in us-central1 and show agents under the default AI application"*
+-   *"Grant group ai-team@example.com viewer access on AI application my-ai-app"*
+-   *"Set the IAM policy on skill my-skill in us"*
 
 ## Prerequisites
 
