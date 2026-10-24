@@ -163,7 +163,10 @@ Before registering a Google Cloud API for Agent Gateway egress, check which buck
 | **Governed Target Services** | Vertex AI Platform (`aiplatform`), Discovery Engine (`discoveryengine`), Pub/Sub (`pubsub`), Cloud Storage (`storage`), Memorybank, Session Service, external MCP servers, custom REST endpoints | **Default Denied** | **Required** (Register all 5 URL variants below) | Agent Gateway Policy + IAP Egressor binding (`roles/iap.egressor`) on the Agent Identity |
 
 > [!TIP]
-> If a user asks whether they need to register a **System API** (`cloudresourcemanager`) or **Platform API** (`logging`, `monitoring`, `trace`, `telemetry`, `oauth2`, `iap`, `agentregistry`) in Agent Registry for Agent Gateway egress, inform them that System and Platform APIs are unconditionally permitted by the runtime/gateway and **do not** require an Agent Registry entry.
+> Whenever a user asks whether specific GCP APIs need to be registered in Agent Registry for Agent Gateway egress:
+> 1. Explicitly classify each API into its bucket (**System API**, **Platform API**, or **Governed Target Service**).
+> 2. Explain that **System APIs** (`cloudresourcemanager`) and **Platform APIs** (`logging`, `monitoring`, `trace`, `telemetry`, `oauth2`, `iap`, `agentregistry`) are **unconditionally allowed** by the runtime/gateway and **do not** require an Agent Registry entry (Platform APIs are governed via standard GCP IAM roles on the Agent Service Account).
+> 3. For any **Governed Target Service** mentioned (such as `aiplatform`, `discoveryengine`, `pubsub`, or `storage`), always show `./scripts/quick-add-gcp-service.sh --service=<SERVICE_ID> --location=<LOCATION>` (or the 5 `gcloud agent-registry services create` commands) and remind the user to bind **`roles/iap.egressor`** to the Agent Identity.
 
 ##### Registering All 5 URL Variants for a Governed Target Service
 

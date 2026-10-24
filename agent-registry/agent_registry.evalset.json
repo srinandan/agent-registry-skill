@@ -941,14 +941,14 @@
           "userContent": {
             "parts": [
               {
-                "text": "Do I need to register Cloud Resource Manager (cloudresourcemanager.googleapis.com), Cloud Logging (logging.googleapis.com), or OAuth2 (oauth2.googleapis.com) as endpoints in Agent Registry for my agent behind Agent Gateway, and how do I register Pub/Sub (pubsub.googleapis.com) in us-central1?"
+                "text": "Do I need to register Cloud Resource Manager (cloudresourcemanager.googleapis.com), Cloud Logging (logging.googleapis.com), or OAuth2 (oauth2.googleapis.com) as endpoints in Agent Registry for my agent behind Agent Gateway, and how does that differ from Governed Target Services like Pub/Sub (pubsub.googleapis.com) in us-central1?"
               }
             ]
           },
           "finalResponse": {
             "parts": [
               {
-                "text": "Explains the 3-bucket API Classification Taxonomy: Cloud Resource Manager (`cloudresourcemanager.googleapis.com`) is a **System API** and Cloud Logging (`logging.googleapis.com`) and OAuth2 (`oauth2.googleapis.com`) are **Platform APIs**, all of which are **unconditionally allowed** by the Agent Runtime / Agent Gateway and do **not** require Endpoint registration in Agent Registry (Platform APIs are governed via standard GCP IAM roles on the Agent Service Account). By contrast, Pub/Sub (`pubsub`) is a **Governed Target Service** (default-denied at Agent Gateway) that requires registering the 5 URL variants in Agent Registry (`./scripts/quick-add-gcp-service.sh --service=pubsub --location=us-central1` or `gcloud agent-registry services create`) and binding `roles/iap.egressor` to the Agent Identity."
+                "text": "Explains the 3-bucket API Classification Taxonomy: Cloud Resource Manager (`cloudresourcemanager.googleapis.com`) is a **System API** and Cloud Logging (`logging.googleapis.com`) and OAuth2 (`oauth2.googleapis.com`) are **Platform APIs**, all of which are **unconditionally allowed** by the Agent Runtime / Agent Gateway and do **not** require Endpoint registration in Agent Registry (Platform APIs are governed via standard GCP IAM roles on the Agent Service Account). By contrast, Pub/Sub (`pubsub`) is a **Governed Target Service** (default-denied at Agent Gateway) that requires registering the 5 URL variants in Agent Registry (e.g., via `./scripts/quick-add-gcp-service.sh --service=pubsub --location=us-central1` or `gcloud agent-registry services create`) and binding `roles/iap.egressor` to the Agent Identity."
               }
             ]
           },
