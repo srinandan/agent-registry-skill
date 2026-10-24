@@ -288,7 +288,7 @@
           "finalResponse": {
             "parts": [
               {
-                "text": "Uses `mcp_agentregistry_search_agents` or `gcloud agent-registry agents search --location=us-central1` with `--search-string=\"skills.tags:fintech\"` and `--search-string=\"skills.id:clinical-trial-matcher-match-biomarker-trials\"`."
+                "text": "Uses `mcp_agentregistry_search_agents` or `gcloud agent-registry agents search --location=us-central1` with `--search-string=\"skills.tags:fintech\"` and `--search-string=\"skills.id:clinical-trial-matcher-match-biomarker-trials\"` (either as separate commands or combined with `OR` as `--search-string=\"skills.tags:fintech OR skills.id:clinical-trial-matcher-match-biomarker-trials\"`)."
               }
             ]
           },
@@ -341,7 +341,7 @@
           "userContent": {
             "parts": [
               {
-                "text": "Register an endpoint called gemini-models in us-central1 for https://us-central1-aiplatform.googleapis.com/v1beta1/publishers/*/models and then update its display name to 'Model Garden on Vertex AI'."
+                "text": "Show me the commands to register an endpoint called gemini-models (with display name 'Vertex AI Model Garden') in us-central1 for https://us-central1-aiplatform.googleapis.com/v1beta1/publishers/*/models and then update its display name to 'Model Garden on Vertex AI'."
               }
             ]
           },
@@ -641,7 +641,7 @@
           "userContent": {
             "parts": [
               {
-                "text": "Create a capability config called agent-governance (display name 'Agent Governance Capability') under folder 849163983723 using my existing project ID agent-registry-demo-1 as the management project. Can I pass the project ID directly to --management-project?"
+                "text": "Create a capability config called agent-governance (display name 'Agent Governance Capability', type agent-management) under folder 849163983723 using my existing project ID agent-registry-demo-1 as the management project. Can I pass the project ID directly to --management-project?"
               }
             ]
           },
@@ -799,6 +799,126 @@
             "parts": [
               {
                 "text": "Uses `from google.adk.integrations.agent_registry import AgentRegistry` (referencing `references/adk-docs.md`), initializes `AgentRegistry(project_id=..., location=...)`, retrieves an `McpToolset` via `registry.get_mcp_toolset(...)` for `LlmAgent(tools=[...])`, and retrieves a remote A2A agent via `registry.get_remote_a2a_agent(...)` for `sub_agents=[...]`."
+              }
+            ]
+          },
+          "creationTimestamp": 0.0
+        }
+      ],
+      "sessionInput": {
+        "appName": "agent-registry",
+        "userId": "eval_user",
+        "state": {}
+      },
+      "creationTimestamp": 0.0,
+      "finalSessionState": {}
+    },
+    {
+      "evalId": "ai_applications_list_get_search_and_subresources",
+      "conversation": [
+        {
+          "invocationId": "",
+          "userContent": {
+            "parts": [
+              {
+                "text": "How do I list, describe, and search AI applications in us-central1, and how do I list the agents and MCP servers scoped to the default AI application?"
+              }
+            ]
+          },
+          "finalResponse": {
+            "parts": [
+              {
+                "text": "Presents the `agentregistry` MCP tools (`mcp_agentregistry_list_ai_applications`, `mcp_agentregistry_get_ai_application`, `mcp_agentregistry_list_ai_application_agents`, `mcp_agentregistry_list_ai_application_mcp_servers`) alongside the `gcloud agent-registry ai-applications` commands: `gcloud agent-registry ai-applications list --location=us-central1`, `gcloud agent-registry ai-applications describe default --location=us-central1`, `gcloud agent-registry ai-applications search --location=us-central1 --search-string=\"...\"` (or `--filter`), and child resource commands `gcloud agent-registry ai-applications agents list --ai-application=default --location=us-central1` and `gcloud agent-registry ai-applications mcp-servers list --ai-application=default --location=us-central1`."
+              }
+            ]
+          },
+          "creationTimestamp": 0.0
+        }
+      ],
+      "sessionInput": {
+        "appName": "agent-registry",
+        "userId": "eval_user",
+        "state": {}
+      },
+      "creationTimestamp": 0.0,
+      "finalSessionState": {}
+    },
+    {
+      "evalId": "ai_applications_iam_policy_management",
+      "conversation": [
+        {
+          "invocationId": "",
+          "userContent": {
+            "parts": [
+              {
+                "text": "How do I get the IAM policy on AI application my-ai-app in us-central1, grant group:ai-team@example.com the roles/agentregistry.viewer role on that AI application, or replace its IAM policy from policy.yaml, and what IAM permissions are required?"
+              }
+            ]
+          },
+          "finalResponse": {
+            "parts": [
+              {
+                "text": "Provides the read-only command `gcloud agent-registry ai-applications get-iam-policy my-ai-app --location=us-central1` (requiring `agentregistry.googleapis.com/aiApplications.getIamPolicy`) and the mutating commands `gcloud agent-registry ai-applications add-iam-policy-binding my-ai-app --location=us-central1 --member=\"group:ai-team@example.com\" --role=\"roles/agentregistry.viewer\"` and `gcloud agent-registry ai-applications set-iam-policy my-ai-app policy.yaml --location=us-central1` (requiring `agentregistry.googleapis.com/aiApplications.setIamPolicy`, granted via `roles/agentregistry.admin`, and requesting user confirmation before executing mutating IAM policy updates)."
+              }
+            ]
+          },
+          "creationTimestamp": 0.0
+        }
+      ],
+      "sessionInput": {
+        "appName": "agent-registry",
+        "userId": "eval_user",
+        "state": {}
+      },
+      "creationTimestamp": 0.0,
+      "finalSessionState": {}
+    },
+    {
+      "evalId": "skills_iam_policy_management",
+      "conversation": [
+        {
+          "invocationId": "",
+          "userContent": {
+            "parts": [
+              {
+                "text": "How do I view and set the IAM policy on a specific skill my-skill in the us region, or bind user:alice@example.com to roles/agentregistry.viewer on that skill, and what IAM permissions are required?"
+              }
+            ]
+          },
+          "finalResponse": {
+            "parts": [
+              {
+                "text": "Provides the read-only command `gcloud alpha agent-registry skills get-iam-policy my-skill --location=us` (requiring `agentregistry.googleapis.com/skills.getIamPolicy`) and the mutating commands `gcloud alpha agent-registry skills add-iam-policy-binding my-skill --location=us --member=\"user:alice@example.com\" --role=\"roles/agentregistry.viewer\"` and `gcloud alpha agent-registry skills set-iam-policy my-skill policy.yaml --location=us` (requiring `agentregistry.googleapis.com/skills.setIamPolicy`, granted via `roles/agentregistry.admin`, and requesting user confirmation before executing mutating IAM policy updates)."
+              }
+            ]
+          },
+          "creationTimestamp": 0.0
+        }
+      ],
+      "sessionInput": {
+        "appName": "agent-registry",
+        "userId": "eval_user",
+        "state": {}
+      },
+      "creationTimestamp": 0.0,
+      "finalSessionState": {}
+    },
+    {
+      "evalId": "quick_add_gcp_service_five_endpoints",
+      "conversation": [
+        {
+          "invocationId": "",
+          "userContent": {
+            "parts": [
+              {
+                "text": "I want to quickly add the Vertex AI Platform API (aiplatform) in us-east7 for project ag-prod-test4 so my agent behind Agent Gateway can call it. What 5 endpoints need to be registered and how do I register them?"
+              }
+            ]
+          },
+          "finalResponse": {
+            "parts": [
+              {
+                "text": "Explains the 5 endpoint URL variants required for a Governed Target GCP Service behind Agent Gateway—Base (`https://aiplatform.googleapis.com`), Base mTLS (`https://aiplatform.mtls.googleapis.com`), Locational (`https://us-east7-aiplatform.googleapis.com`), Locational mTLS (`https://us-east7-aiplatform.mtls.googleapis.com`), and Regional REP (`https://aiplatform.us-east7.rep.googleapis.com`)—provides `./scripts/quick-add-gcp-service.sh --service=aiplatform --location=us-east7 --project=ag-prod-test4` and/or the 5 `gcloud agent-registry services create` commands (`aiplatform`, `aiplatform-mtls`, `us-east7-aiplatform`, `us-east7-aiplatform-mtls`, `aiplatform-us-east7-rep` with `--endpoint-spec-type=no-spec`), reminds the user to bind `roles/iap.egressor` to the Agent Identity, and requests user confirmation before running mutating commands."
               }
             ]
           },

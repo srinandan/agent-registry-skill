@@ -19,6 +19,10 @@ on:
       - '.github/workflows/skill-evals.yml'
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   evaluate-skills:
     name: Evaluate Skills & Generate Report

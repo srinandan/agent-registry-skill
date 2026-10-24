@@ -25,6 +25,9 @@ GROUPS
      agents
         Manage Agent resources.
 
+     ai-applications
+        Manage Ai Application resources.
+
      bindings
         Manage Binding resources.
 
@@ -384,6 +387,9 @@ GROUPS
 COMMANDS
     COMMAND is one of the following:
 
+     add-iam-policy-binding
+        (ALPHA) Add IAM policy binding to a Skill.
+
      create
         (ALPHA) Create skills.
 
@@ -393,11 +399,20 @@ COMMANDS
      describe
         (ALPHA) Describe skills.
 
+     get-iam-policy
+        (ALPHA) Get IAM policy for a Skill.
+
      list
         (ALPHA) List skills.
 
+     remove-iam-policy-binding
+        (ALPHA) Remove IAM policy binding from a Skill.
+
      search
         (ALPHA) search skills.
+
+     set-iam-policy
+        (ALPHA) Set the IAM policy for a Skill.
 
      update
         (ALPHA) Update skills.
@@ -475,6 +490,170 @@ COMMANDS
 
      list
         (ALPHA) List skillRevisions.
+```
+
+#### `get-iam-policy` / `set-iam-policy` / `add-iam-policy-binding` / `remove-iam-policy-binding`
+
+```text
+SYNOPSIS
+    gcloud alpha agent-registry skills get-iam-policy (SKILL : --location=LOCATION)
+        [--filter=EXPRESSION] [--limit=LIMIT] [--page-size=PAGE_SIZE]
+        [--sort-by=[FIELD,...]] [GCLOUD_WIDE_FLAG ...]
+
+    gcloud alpha agent-registry skills set-iam-policy (SKILL : --location=LOCATION)
+        POLICY_FILE [GCLOUD_WIDE_FLAG ...]
+
+    gcloud alpha agent-registry skills add-iam-policy-binding
+        (SKILL : --location=LOCATION) --member=PRINCIPAL --role=ROLE
+        [--condition=[KEY=VALUE,...] | --condition-from-file=PATH_TO_FILE]
+        [GCLOUD_WIDE_FLAG ...]
+
+    gcloud alpha agent-registry skills remove-iam-policy-binding
+        (SKILL : --location=LOCATION) --member=PRINCIPAL --role=ROLE
+        [--all | --condition=[KEY=VALUE,...]
+          | --condition-from-file=PATH_TO_FILE] [GCLOUD_WIDE_FLAG ...]
+```
+
+---
+
+### ai-applications
+
+```text
+NAME
+    gcloud agent-registry ai-applications - manage Ai Application resources
+
+SYNOPSIS
+    gcloud agent-registry ai-applications GROUP | COMMAND [GCLOUD_WIDE_FLAG ...]
+
+DESCRIPTION
+    Manage Ai Application resources (also available under
+    `gcloud alpha agent-registry ai-applications`).
+
+GROUPS
+    GROUP is one of the following:
+
+     agents
+        Manage Agent resources scoped to an AI Application.
+
+     endpoints
+        Manage Endpoint resources scoped to an AI Application.
+
+     mcp-servers
+        Manage Mcp Server resources scoped to an AI Application.
+
+COMMANDS
+    COMMAND is one of the following:
+
+     add-iam-policy-binding
+        Add IAM policy binding to an AI Application.
+
+     create
+        Create aiApplications.
+
+     delete
+        Delete aiApplications.
+
+     describe
+        Describe aiApplications.
+
+     get-iam-policy
+        Get IAM policy for an AI Application.
+
+     list
+        List aiApplications.
+
+     remove-iam-policy-binding
+        Remove IAM policy binding from an AI Application.
+
+     search
+        Search aiApplications.
+
+     set-iam-policy
+        Set the IAM policy for an AI Application.
+
+     update
+        Update aiApplications.
+```
+
+#### `list` / `describe` / `search`
+
+```text
+SYNOPSIS
+    gcloud agent-registry ai-applications list --location=LOCATION
+        [--filter=EXPRESSION] [--limit=LIMIT] [--page-size=PAGE_SIZE]
+        [--sort-by=[FIELD,...]] [GCLOUD_WIDE_FLAG ...]
+
+    gcloud agent-registry ai-applications describe
+        (AI_APPLICATION : --location=LOCATION) [GCLOUD_WIDE_FLAG ...]
+
+    gcloud agent-registry ai-applications search --location=LOCATION
+        [--search-string=SEARCH_STRING] [--filter=EXPRESSION]
+        [--limit=LIMIT] [--page-size=PAGE_SIZE] [GCLOUD_WIDE_FLAG ...]
+```
+
+#### `create` / `update` / `delete`
+
+```text
+SYNOPSIS
+    gcloud agent-registry ai-applications create
+        (AI_APPLICATION : --location=LOCATION) [--async]
+        [--description=DESCRIPTION] [--display-name=DISPLAY_NAME]
+        [--labels=[KEY=VALUE,...]] [--members=[MEMBERS,...]]
+        [--request-id=REQUEST_ID] [GCLOUD_WIDE_FLAG ...]
+
+    gcloud agent-registry ai-applications update
+        (AI_APPLICATION : --location=LOCATION) [--async]
+        [--description=DESCRIPTION] [--display-name=DISPLAY_NAME]
+        [--labels=[KEY=VALUE,...]] [--members=[MEMBERS,...]]
+        [--request-id=REQUEST_ID] [GCLOUD_WIDE_FLAG ...]
+
+    gcloud agent-registry ai-applications delete
+        (AI_APPLICATION : --location=LOCATION) [--async] [--etag=ETAG]
+        [--request-id=REQUEST_ID] [GCLOUD_WIDE_FLAG ...]
+```
+
+#### `get-iam-policy` / `set-iam-policy` / `add-iam-policy-binding` / `remove-iam-policy-binding`
+
+```text
+SYNOPSIS
+    gcloud agent-registry ai-applications get-iam-policy
+        (AI_APPLICATION : --location=LOCATION) [--filter=EXPRESSION]
+        [--limit=LIMIT] [--page-size=PAGE_SIZE] [--sort-by=[FIELD,...]]
+        [GCLOUD_WIDE_FLAG ...]
+
+    gcloud agent-registry ai-applications set-iam-policy
+        (AI_APPLICATION : --location=LOCATION) POLICY_FILE
+        [GCLOUD_WIDE_FLAG ...]
+
+    gcloud agent-registry ai-applications add-iam-policy-binding
+        (AI_APPLICATION : --location=LOCATION) --member=PRINCIPAL --role=ROLE
+        [--condition=[KEY=VALUE,...] | --condition-from-file=PATH_TO_FILE]
+        [GCLOUD_WIDE_FLAG ...]
+
+    gcloud agent-registry ai-applications remove-iam-policy-binding
+        (AI_APPLICATION : --location=LOCATION) --member=PRINCIPAL --role=ROLE
+        [--all | --condition=[KEY=VALUE,...]
+          | --condition-from-file=PATH_TO_FILE] [GCLOUD_WIDE_FLAG ...]
+```
+
+#### `agents` / `mcp-servers` / `endpoints` (Subgroups under `ai-applications`)
+
+```text
+SYNOPSIS
+    gcloud agent-registry ai-applications agents (list | describe | search)
+        --ai-application=AI_APPLICATION --location=LOCATION
+        [--search-string=SEARCH_STRING] [--filter=EXPRESSION]
+        [GCLOUD_WIDE_FLAG ...]
+
+    gcloud agent-registry ai-applications mcp-servers (list | describe | search)
+        --ai-application=AI_APPLICATION --location=LOCATION
+        [--search-string=SEARCH_STRING] [--filter=EXPRESSION]
+        [GCLOUD_WIDE_FLAG ...]
+
+    gcloud agent-registry ai-applications endpoints (list | describe | search)
+        --ai-application=AI_APPLICATION --location=LOCATION
+        [--search-string=SEARCH_STRING] [--filter=EXPRESSION]
+        [GCLOUD_WIDE_FLAG ...]
 ```
 
 ---

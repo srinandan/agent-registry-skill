@@ -2,13 +2,17 @@
 name: agent-registry
 description: >
   Use this skill whenever the user wants to interact with Google Cloud's Agent Registry
-  using gcloud commands. Triggers on any mention of "agent registry", "agent-registry",
+  using gcloud commands or MCP tools. Triggers on any mention of "agent registry", "agent-registry",
   "mcp-servers", "gcloud agents", "register an agent", "list agents", "create a service",
-  "agent service", "management boundary", "boundary", "boundary-configs", "boundaries",
+  "agent service", "ai applications", "ai-applications", "ai apps", "default ai application",
+  "set-iam-policy", "get-iam-policy", "add-iam-policy-binding", "remove-iam-policy-binding",
+  "quick add", "quick-add", "gcp service", "5 endpoints", "agent gateway", "rep.googleapis.com",
+  "management boundary", "boundary", "boundary-configs", "boundaries",
   "capability-configs", "capability config", "management project", or any request to
-  manage agents, MCP servers, endpoints, services, bindings, skills, or management
-  boundaries in Google Cloud Agent Registry. Also triggers on requests to integrate or
-  use the Google Agent Development Kit (ADK) with the Agent Registry.
+  manage agents, MCP servers, endpoints, services, bindings, skills, AI applications,
+  resource-level IAM policies, or management boundaries in Google Cloud Agent Registry.
+  Also triggers on requests to integrate or use the Google Agent Development Kit (ADK)
+  with the Agent Registry.
 metadata:
   author: srinandan
   version: "0.1"
@@ -16,7 +20,7 @@ metadata:
 
 # Google Cloud Agent Registry Skill
 
-Help users interact with Google Cloud Agent Registry using `gcloud agent-registry` (GA resources: agents, mcp-servers, services, endpoints, bindings, operations), `gcloud alpha agent-registry skills` (Alpha feature: skills and skill revisions), and `gcloud resource-manager` (`boundary-configs`, `capability-configs`, `boundaries`, and `tags bindings` for setting up Agent Registry management boundaries) by translating natural language into the correct gcloud command, showing it for approval, then executing it.
+Help users interact with Google Cloud Agent Registry using `gcloud agent-registry` (GA resources: agents, mcp-servers, services, endpoints, bindings, ai-applications, operations), `gcloud alpha agent-registry skills` / `gcloud agent-registry skills` (skills, skill revisions, and skill IAM policies), `agentregistry` MCP tools, and `gcloud resource-manager` (`boundary-configs`, `capability-configs`, `boundaries`, and `tags bindings` for setting up Agent Registry management boundaries) by translating natural language into the correct command or MCP call, showing mutating commands for approval, then executing them.
 
 ## Workflow
 
@@ -30,8 +34,8 @@ Help users interact with Google Cloud Agent Registry using `gcloud agent-registr
 2. **Parse** the user's request to identify the resource and action.
 3. **Construct** the gcloud command using session defaults.
 4. **Approval**:
-   - For `list` and `describe` commands: Skip explicit approval and execute immediately.
-   - For `create`, `delete`, or `update` commands: Show the command and ask for approval: _"Ready to run this command? (yes/no)"_
+   - For read-only commands (`list`, `describe`, `search`, and `get-iam-policy`): Skip explicit approval and execute immediately.
+   - For mutating commands (`create`, `delete`, `update`, `set-iam-policy`, `add-iam-policy-binding`, and `remove-iam-policy-binding`): Show the command and ask for approval: _"Ready to run this command? (yes/no)"_
 5. **Execute** and display the output.
 
 ## Auth & Setup
@@ -54,9 +58,10 @@ gcloud config set api_endpoint_overrides/agentregistry https://agentregistry.goo
 
 | Role | Access Level |
 |------|--------------|
-| `roles/agentregistry.admin` | Full administrative access |
-| `roles/agentregistry.editor` | Editor access |
-| `roles/agentregistry.viewer` | Read only access |
+| `roles/agentregistry.admin` | Full administrative access across all Agent Registry resources, including resource-level IAM policy management (`agentregistry.googleapis.com/aiApplications.{getIamPolicy,setIamPolicy}` and `agentregistry.googleapis.com/skills.{getIamPolicy,setIamPolicy}`) |
+| `roles/agentregistry.editor` | Editor access to register and update agents, MCP servers, endpoints, services, bindings, and skills, plus read-only access to AI Applications (`aiApplications.get`, `aiApplications.list`) |
+| `roles/agentregistry.viewer` | Read-only access (`get`, `list`, `search`) to agents, MCP servers, endpoints, services, bindings, skills, and AI Applications |
+| `roles/agentregistry.invoker` | Invoker access (`agentregistry.registries.invoke`) to query and invoke an AI Application's localized data plane endpoint |
 | `roles/resourcemanager.editor` | Create and update `BoundaryConfig`, `CapabilityConfig`, and `Boundary` on the parent folder or organization |
 | `roles/resourcemanager.viewer` | Read `BoundaryConfig`, `CapabilityConfig`, and `Boundary` resources |
 | `roles/resourcemanager.tagUser` | Bind tag values (`tags bindings create/delete`) to projects |
@@ -142,6 +147,63 @@ gcloud agent-registry services update gemini-models \
   --display-name="Model Garden on Vertex AI" \
   --location=us-central1
 ```
+
+#### Quick Add GCP Service (5-Variant Endpoint Registration for Agent Gateway)
+
+When an autonomous agent runs behind a governed **Agent Gateway** (which intercepts HTTP egress with a default-deny policy), Google Cloud Client SDKs dynamically resolve endpoints at runtime across global, regional, mTLS, and Regional Endpoint (REP) hostname variants. Registering only a single URL causes runtime calls to the other variants to be blocked.
+
+When a user wants to quickly add a Google Cloud API (such as `aiplatform`, `discoveryengine`, `pubsub`, or `storage`) in a region (`LOCATION`, e.g. `us-central1` or `us-east7`), use the bundled `./scripts/quick-add-gcp-service.sh` helper script or run the 5 `gcloud agent-registry services create` commands below (always previewing and asking for user approval before executing, since creating services mutates state):
+
+| # | Variant | Service ID | Display Name | Endpoint URL |
+|---|---------|------------|--------------|--------------|
+| 1 | **Base** | `${SERVICE_ID}` | `${SERVICE_ID}` | `https://${SERVICE_ID}.googleapis.com` |
+| 2 | **Base mTLS** | `${SERVICE_ID}-mtls` | `${SERVICE_ID} mTLS` | `https://${SERVICE_ID}.mtls.googleapis.com` |
+| 3 | **Locational** | `${LOCATION}-${SERVICE_ID}` | `${SERVICE_ID} Locational` | `https://${LOCATION}-${SERVICE_ID}.googleapis.com` |
+| 4 | **Locational mTLS** | `${LOCATION}-${SERVICE_ID}-mtls` | `${SERVICE_ID} Locational mTLS` | `https://${LOCATION}-${SERVICE_ID}.mtls.googleapis.com` |
+| 5 | **Regional REP** | `${SERVICE_ID}-${LOCATION}-rep` | `${SERVICE_ID} Regional (REP)` | `https://${SERVICE_ID}.${LOCATION}.rep.googleapis.com` |
+
+```bash
+# Option A: Use the bundled Quick Add helper script (registers all 5 URL variants)
+./scripts/quick-add-gcp-service.sh --service=aiplatform --location=us-central1 --project=PROJECT_ID
+
+# Option B: Equivalent explicit gcloud commands for all 5 URL variants
+SERVICE_ID="aiplatform"
+LOCATION="us-central1"
+PROJECT_ID="PROJECT_ID"
+
+# 1. Base
+gcloud agent-registry services create "${SERVICE_ID}" \
+  --project="${PROJECT_ID}" --location="${LOCATION}" \
+  --display-name="${SERVICE_ID}" --endpoint-spec-type=no-spec \
+  --interfaces='[{"protocolBinding": "jsonrpc", "url": "https://'"${SERVICE_ID}"'.googleapis.com"}]'
+
+# 2. Base mTLS
+gcloud agent-registry services create "${SERVICE_ID}-mtls" \
+  --project="${PROJECT_ID}" --location="${LOCATION}" \
+  --display-name="${SERVICE_ID} mTLS" --endpoint-spec-type=no-spec \
+  --interfaces='[{"protocolBinding": "jsonrpc", "url": "https://'"${SERVICE_ID}"'.mtls.googleapis.com"}]'
+
+# 3. Locational
+gcloud agent-registry services create "${LOCATION}-${SERVICE_ID}" \
+  --project="${PROJECT_ID}" --location="${LOCATION}" \
+  --display-name="${SERVICE_ID} Locational" --endpoint-spec-type=no-spec \
+  --interfaces='[{"protocolBinding": "jsonrpc", "url": "https://'"${LOCATION}-${SERVICE_ID}"'.googleapis.com"}]'
+
+# 4. Locational mTLS
+gcloud agent-registry services create "${LOCATION}-${SERVICE_ID}-mtls" \
+  --project="${PROJECT_ID}" --location="${LOCATION}" \
+  --display-name="${SERVICE_ID} Locational mTLS" --endpoint-spec-type=no-spec \
+  --interfaces='[{"protocolBinding": "jsonrpc", "url": "https://'"${LOCATION}-${SERVICE_ID}"'.mtls.googleapis.com"}]'
+
+# 5. Regional REP
+gcloud agent-registry services create "${SERVICE_ID}-${LOCATION}-rep" \
+  --project="${PROJECT_ID}" --location="${LOCATION}" \
+  --display-name="${SERVICE_ID} Regional (REP)" --endpoint-spec-type=no-spec \
+  --interfaces='[{"protocolBinding": "jsonrpc", "url": "https://'"${SERVICE_ID}.${LOCATION}"'.rep.googleapis.com"}]'
+```
+
+> [!IMPORTANT]
+> After registering the 5 endpoint variants for a Governed Target Service, remind the user to bind the **`roles/iap.egressor`** role to the Agent Identity so Agent Gateway permits egress traffic to those endpoints.
 
 ### 4. GKE Based Agents
 Used to configure Kubernetes deployments to be registered as an Agent or MCP Server. You can add the required `apphub.cloud.google.com/functional-type` annotation to YAML files using the provided python script.
@@ -251,9 +313,142 @@ gcloud alpha agent-registry skills revisions list --skill=my-skill --location=us
 gcloud alpha agent-registry skills revisions describe REVISION_ID --skill=my-skill --location=us
 gcloud alpha agent-registry skills revisions download REVISION_ID --skill=my-skill --location=us
 gcloud alpha agent-registry skills revisions delete REVISION_ID --skill=my-skill --location=us
+
+# Manage Resource-Level IAM Policies on a Skill (also available via `gcloud agent-registry skills`)
+# Get the IAM policy for a Skill (read-only — execute immediately)
+gcloud alpha agent-registry skills get-iam-policy my-skill --location=us
+
+# Set the IAM policy on a Skill from a JSON/YAML policy file (mutating — ask for approval first)
+gcloud alpha agent-registry skills set-iam-policy my-skill policy.json --location=us
+
+# Grant a principal a role (e.g., viewer or editor) on a specific Skill (mutating — ask for approval first)
+gcloud alpha agent-registry skills add-iam-policy-binding my-skill \
+  --location=us \
+  --member='user:test-user@example.com' \
+  --role='roles/agentregistry.viewer'
+
+# Remove an IAM policy binding from a specific Skill (mutating — ask for approval first)
+gcloud alpha agent-registry skills remove-iam-policy-binding my-skill \
+  --location=us \
+  --member='user:test-user@example.com' \
+  --role='roles/agentregistry.viewer'
 ```
 
-### 7. Management Boundary Setup (Admin Governance)
+> **Skill IAM Permissions:** Getting and setting a Skill's resource-level IAM policy requires `agentregistry.googleapis.com/skills.getIamPolicy` and `agentregistry.googleapis.com/skills.setIamPolicy` (included in `roles/agentregistry.admin`). Both `gcloud alpha agent-registry skills` and `gcloud agent-registry skills` support `get-iam-policy`, `set-iam-policy`, `add-iam-policy-binding`, and `remove-iam-policy-binding`.
+
+### 7. AI Applications (`ai-applications`)
+An **AI Application** (`projects/{project}/locations/{location}/aiApplications/{ai_application}`) is a top-level application container and runtime governance perimeter in Agent Registry that groups agents, MCP servers, and endpoints serving a business workload (including the system-managed per-location Default AI Application `aiApplications/default` as well as named AI Applications such as `ge-support-hub`).
+
+> [!NOTE]
+> Read-only inspection and discovery of AI Applications and their subresources (`agents`, `mcp-servers`, `endpoints`) are supported through both the **`agentregistry` MCP server tools** and **`gcloud agent-registry ai-applications`** CLI commands. Execute read-only commands (`list`, `describe`, `search`, `get-iam-policy`) immediately, and ask for user approval before executing mutating commands (`create`, `update`, `delete`, `set-iam-policy`, `add-iam-policy-binding`, `remove-iam-policy-binding`).
+
+#### MCP Tools for AI Applications (`agentregistry` MCP Server)
+
+| Operation | MCP Tool (`agentregistry`) | Key Arguments |
+|-----------|----------------------------|---------------|
+| **List AI Applications** | `mcp_agentregistry_list_ai_applications` | `parent`: `projects/{project}/locations/{location}`; optional `filter`, `orderBy`, `pageSize`, `pageToken` |
+| **Get AI Application** | `mcp_agentregistry_get_ai_application` | `name`: `projects/{project}/locations/{location}/aiApplications/{ai_application}` |
+| **List AI App Agents** | `mcp_agentregistry_list_ai_application_agents` | `parent`: `projects/{project}/locations/{location}/aiApplications/{ai_application}`; optional `pageSize`, `pageToken` |
+| **Get AI App Agent** | `mcp_agentregistry_get_ai_application_agent` | `name`: `projects/{project}/locations/{location}/aiApplications/{ai_application}/agents/{agent}` |
+| **List AI App MCP Servers** | `mcp_agentregistry_list_ai_application_mcp_servers` | `parent`: `projects/{project}/locations/{location}/aiApplications/{ai_application}`; optional `pageSize`, `pageToken` |
+| **Get AI App MCP Server** | `mcp_agentregistry_get_ai_application_mcp_server` | `name`: `projects/{project}/locations/{location}/aiApplications/{ai_application}/mcpServers/{mcp_server}` |
+| **List AI App Endpoints** | `mcp_agentregistry_list_ai_application_endpoints` | `parent`: `projects/{project}/locations/{location}/aiApplications/{ai_application}`; optional `pageSize`, `pageToken` |
+| **Get AI App Endpoint** | `mcp_agentregistry_get_ai_application_endpoint` | `name`: `projects/{project}/locations/{location}/aiApplications/{ai_application}/endpoints/{endpoint}` |
+
+#### `gcloud` CLI Usage (`gcloud agent-registry ai-applications`)
+
+```bash
+# List all AI Applications in a location (e.g., global, us, eu, or us-central1)
+gcloud agent-registry ai-applications list --location=us-central1
+
+# Describe (get) a specific AI Application (e.g., 'my-app' or the regional 'default' AI Application)
+gcloud agent-registry ai-applications describe my-app --location=us-central1
+gcloud agent-registry ai-applications describe default --location=us-central1
+
+# Search / filter AI Applications by displayName, state, environment, or criticality
+gcloud agent-registry ai-applications list \
+  --location=us-central1 \
+  --filter='displayName:"Customer Support*" AND state=ACTIVE'
+
+gcloud agent-registry ai-applications list \
+  --location=us-central1 \
+  --filter="attributes.environment.type=PRODUCTION AND attributes.criticality.type=HIGH"
+
+gcloud agent-registry ai-applications search \
+  --location=us-central1 \
+  --search-string="displayName:Support*"
+
+# Create an AI Application with governance attributes (mutating — ask for approval first)
+gcloud agent-registry ai-applications create my-app \
+  --location=us-central1 \
+  --display-name="Customer Support App" \
+  --description="AI Application orchestrating customer support agents" \
+  --environment-type=production \
+  --criticality-type=high \
+  --business-owners=email=biz-owner@example.com \
+  --developer-owners=email=dev-owner@example.com \
+  --operator-owners=email=ops-owner@example.com
+
+# Update an AI Application (mutating — ask for approval first)
+gcloud agent-registry ai-applications update my-app \
+  --location=us-central1 \
+  --display-name="Updated Support App" \
+  --environment-type=staging \
+  --criticality-type=medium
+
+# Delete an AI Application (use --force to also delete child resources; mutating — ask for approval first)
+gcloud agent-registry ai-applications delete my-app --location=us-central1 --force
+```
+
+#### Managing & Searching Per-App Subresources (`agents`, `mcp-servers`, `endpoints`)
+
+```bash
+# List and describe Agents registered under an AI Application (e.g., 'my-app' or 'default')
+gcloud agent-registry ai-applications agents list --ai-application=my-app --location=us-central1
+gcloud agent-registry ai-applications agents describe AGENT_ID --ai-application=my-app --location=us-central1
+
+# Search Agents within an AI Application's localized registry
+gcloud agent-registry ai-applications agents search --ai-application=my-app --location=us-central1 \
+  --search-string="displayName:Assistant*"
+
+# List, describe, and search MCP Servers under an AI Application
+gcloud agent-registry ai-applications mcp-servers list --ai-application=my-app --location=us-central1
+gcloud agent-registry ai-applications mcp-servers describe MCP_SERVER_ID --ai-application=my-app --location=us-central1
+gcloud agent-registry ai-applications mcp-servers search --ai-application=my-app --location=us-central1 \
+  --search-string="displayName:GitHub*"
+
+# List, describe, and search Endpoints under an AI Application
+gcloud agent-registry ai-applications endpoints list --ai-application=my-app --location=us-central1
+gcloud agent-registry ai-applications endpoints describe ENDPOINT_ID --ai-application=my-app --location=us-central1
+gcloud agent-registry ai-applications endpoints search --ai-application=my-app --location=us-central1 \
+  --search-string="displayName:Model*"
+```
+
+#### Resource-Level IAM Policy Management on AI Applications
+
+Administrators can inspect and configure resource-level IAM policies on individual AI Applications (`projects/{project}/locations/{location}/aiApplications/{ai_application}`). Getting and setting an AI Application's IAM policy requires `agentregistry.googleapis.com/aiApplications.getIamPolicy` and `agentregistry.googleapis.com/aiApplications.setIamPolicy` (granted in `roles/agentregistry.admin`).
+
+```bash
+# Get the IAM policy for a specific AI Application (read-only — execute immediately)
+gcloud agent-registry ai-applications get-iam-policy my-app --location=us-central1
+
+# Set the IAM policy on a specific AI Application from a policy file (mutating — ask for approval first)
+gcloud agent-registry ai-applications set-iam-policy my-app policy.json --location=us-central1
+
+# Grant a principal a role (e.g., viewer, editor, or invoker) on a specific AI Application (mutating — ask for approval first)
+gcloud agent-registry ai-applications add-iam-policy-binding my-app \
+  --location=us-central1 \
+  --member='group:support-team@example.com' \
+  --role='roles/agentregistry.viewer'
+
+# Remove an IAM policy binding from an AI Application (mutating — ask for approval first)
+gcloud agent-registry ai-applications remove-iam-policy-binding my-app \
+  --location=us-central1 \
+  --member='group:support-team@example.com' \
+  --role='roles/agentregistry.viewer'
+```
+
+### 8. Management Boundary Setup (Admin Governance)
 Used by Agent Registry administrators to configure hub-and-spoke governance perimeters across a Google Cloud Folder or Organization using Cloud Resource Manager (`BoundaryConfig`, `CapabilityConfig`, `Boundary`, and Tag Bindings). When member (spoke) projects match a boundary's tag filter, Agent Registry automatically discovers runtime agents and MCP servers deployed across those member projects and aggregates them into the designated Management Project (hub) catalog.
 
 #### Resource Model Overview
@@ -306,11 +501,11 @@ Always share relevant best practices with the admin as you guide them through se
 
 - **Set `BoundaryConfig` Tag Key Before Attaching Boundaries**: Configure the partitioning `tagKey` (`gcloud resource-manager boundary-configs update`) *before* creating and attaching boundaries. Once any boundary under the node is attached to a `CapabilityConfig`, Cloud Resource Manager locks `tagKey` on that node (requiring all boundaries to be detached before `tagKey` can be changed). If `tagKey` is left unset, the node supports at most one filter-less boundary that matches every child project under the node.
 - **Use Separate `CapabilityConfig` + Management Project for Strict `dev`/`prod` Isolation**: Every boundary attached to the same `CapabilityConfig` merges its discovered agents and MCP servers into one Management Project catalog. There is no `--boundary` filter on `gcloud agent-registry` queries, and granting `roles/agentregistry.viewer` on a Management Project exposes assets from all boundaries attached to it. To guarantee zero cross-perimeter leakage between environments (e.g., `dev` vs. `prod`), create a separate `CapabilityConfig`, Management Project, and `Boundary` for each environment.
-- **Always Use Project Numbers (`projects/<PROJECT_NUMBER>`)**: Cloud Resource Manager v3 requires project **numbers** (not project IDs) for `--management-project=projects/<PROJECT_NUMBER>` on `capability-configs create` and `--parent=//cloudresourcemanager.googleapis.com/projects/<PROJECT_NUMBER>` on `tags bindings create`. Automatically resolve project IDs to project numbers for the user with:
+- **Always Use Project Numbers (`projects/<PROJECT_NUMBER>`)**: Cloud Resource Manager v3 requires project **numbers** (not project IDs) for `--management-project=projects/<PROJECT_NUMBER>` on `capability-configs create` and `--parent=//cloudresourcemanager.googleapis.com/projects/<PROJECT_NUMBER>` on `tags bindings create`. Whenever a user provides a project ID for `--management-project`, always output **both** the lookup command below **and** the complete `gcloud resource-manager capability-configs create` command template using `--management-project=projects/<PROJECT_NUMBER>` (defaulting `--types=agent-management` when not specified) in the same response:
   ```bash
   gcloud projects describe PROJECT_ID --format="value(projectNumber)"
   ```
-- **Tag Binding Updates Require Delete-Then-Create**: GCP Tags allow at most one value per tag key on a resource (`tags bindings create` fails with `FAILED_PRECONDITION` if another value under the same tag key is already bound). To move a project from `dev` to `prod`, first run `tags bindings delete` for the old value and then `tags bindings create` for the new value. Tag changes take ~2–7 minutes to fully propagate.
+- **Tag Binding Updates Require Delete-Then-Create**: Whenever a user asks to move a project from one boundary/tag value to another (e.g., `dev` to `prod`), always explicitly warn them that GCP Tags allow at most one value per tag key on a resource (`tags bindings create` does not overwrite an existing binding and fails with `FAILED_PRECONDITION` if another value under the same tag key is already bound), and then provide the `tags bindings delete` followed by `tags bindings create` commands. Tag changes take ~2–7 minutes to fully propagate.
 - **Resource ID & Display Name Constraints**: `capability_config_id` and `boundary_id` must be 6–30 lowercase ASCII letters, digits, or hyphens, must start with a letter, and cannot end with a hyphen. `--display-name` must be 4–30 characters.
 - **Centralize Manual Registrations in the Hub (Spoke Governance)**: Automatic runtime discovery (e.g., Vertex AI Agent Engine / Reasoning Engine and GKE agents/MCP servers) works across spoke member projects even when `agentregistry.googleapis.com` is disabled on the spoke projects. However, user-defined `Services` (`gcloud agent-registry services create`) and `Bindings` created locally in a spoke project stay isolated to that spoke and **do not roll up** to the Management Project. Register third-party MCP servers, custom agents, endpoints, and bindings centrally in the Management Project, and consider disabling `agentregistry.googleapis.com` (or restricting `services.*` and `bindings.*` write permissions via IAM Deny / Org Policy `gcp.restrictServiceUsage`) on spoke workload projects.
 - **Follow Required Teardown Order**: Cloud Resource Manager blocks deleting an attached `Boundary` or a `CapabilityConfig` with attached boundaries. Always detach boundaries first (`gcloud resource-manager capability-configs update <ID> --folder=<FOLDER_ID> --clear-boundaries`), then delete the `Boundary`, and finally delete the `CapabilityConfig`. Deleting a `CapabilityConfig` preserves a Bring-Your-Own project (`isManagementProject` reverts to `false`), whereas a Google-managed Management Project is deleted.
@@ -515,8 +710,12 @@ All `gcloud agent-registry` commands support `--location` (required) and `--proj
 | `services` | `create`, `list`, `describe`, `update`, `delete` | GA |
 | `bindings` | `create`, `list`, `describe`, `update`, `delete` | GA |
 | `operations` | `list`, `describe` | GA |
-| `skills` | `create`, `list`, `describe`, `update`, `delete`, `search` | Alpha (`agentregistry` MCP tools + `gcloud alpha agent-registry skills`) |
+| `skills` | `create`, `list`, `describe`, `update`, `delete`, `search`, `get-iam-policy`, `set-iam-policy`, `add-iam-policy-binding`, `remove-iam-policy-binding` | Alpha (`agentregistry` MCP tools + `gcloud alpha agent-registry skills`) |
 | `skills revisions` | `create`, `list`, `describe`, `delete`, `download` | Alpha (`agentregistry` MCP tools + `gcloud alpha agent-registry skills revisions`) |
+| `ai-applications` | `list`, `describe`, `search`, `create`, `update`, `delete`, `get-iam-policy`, `set-iam-policy`, `add-iam-policy-binding`, `remove-iam-policy-binding` | Preview / Alpha (`agentregistry` MCP tools + `gcloud agent-registry ai-applications`) |
+| `ai-applications agents` | `list`, `describe`, `search` | Preview / Alpha (`agentregistry` MCP tools + `gcloud agent-registry ai-applications agents`) |
+| `ai-applications mcp-servers` | `list`, `describe`, `search` | Preview / Alpha (`agentregistry` MCP tools + `gcloud agent-registry ai-applications mcp-servers`) |
+| `ai-applications endpoints` | `list`, `describe`, `search` | Preview / Alpha (`agentregistry` MCP tools + `gcloud agent-registry ai-applications endpoints`) |
 | `boundary-configs` | `describe`, `update` | GA (`gcloud resource-manager boundary-configs`) |
 | `capability-configs` | `create`, `list`, `describe`, `update`, `delete` | GA (`gcloud resource-manager capability-configs`) |
 | `boundaries` | `create`, `list`, `describe`, `update`, `delete` | GA (`gcloud resource-manager boundaries`) |
@@ -558,6 +757,8 @@ All `gcloud agent-registry` commands support `--location` (required) and `--proj
 | "show me a dashboard for my mcp servers" | `./scripts/mcp-dashboard.sh` |
 | "show me a dashboard for my skills" | `./scripts/skill-dashboard.sh` |
 | "Change display name of gemini-models to 'Vertex AI Model Garden'" | `gcloud agent-registry services update gemini-models --display-name="..." --location=us-central1` |
+| "Quickly add the aiplatform GCP service in us-east7 (all 5 endpoints)" | `./scripts/quick-add-gcp-service.sh --service=aiplatform --location=us-east7` |
+| "Quick add pubsub API endpoints for Agent Gateway in us-central1" | `./scripts/quick-add-gcp-service.sh --service=pubsub --location=us-central1` |
 | "Which agents in us-central1 are based on reasoning engine?" | `gcloud agent-registry agents list --location=us-central1 --filter="attributes.\"agentregistry.googleapis.com/system/RuntimeReference\".uri:reasoningEngine"` |
 | "List all vertex ai agents" | `gcloud agent-registry agents list --location=us-central1 --filter="attributes.\"agentregistry.googleapis.com/system/RuntimeReference\".uri:reasoningEngine"` |
 | "Show agents with agent engine runtime" | `gcloud agent-registry agents list --location=us-central1 --filter="attributes.\"agentregistry.googleapis.com/system/RuntimeReference\".uri:reasoningEngine"` |
@@ -575,6 +776,17 @@ All `gcloud agent-registry` commands support `--location` (required) and `--proj
 | "List all skills" | `gcloud alpha agent-registry skills list --location=us` |
 | "Show details of skill my-skill" | `gcloud alpha agent-registry skills describe my-skill --location=us` |
 | "Search skills matching query" | `gcloud alpha agent-registry skills search --location=us --query="QUERY"` |
+| "Get IAM policy on skill my-skill" | `gcloud alpha agent-registry skills get-iam-policy my-skill --location=us` |
+| "Grant user alice@example.com viewer role on skill my-skill" | `gcloud alpha agent-registry skills add-iam-policy-binding my-skill --location=us --member="user:alice@example.com" --role="roles/agentregistry.viewer"` |
+| "Set IAM policy on skill my-skill from policy.yaml" | `gcloud alpha agent-registry skills set-iam-policy my-skill policy.yaml --location=us` |
+| "List all AI applications" | `gcloud agent-registry ai-applications list --location=us-central1` |
+| "Describe the default AI application" | `gcloud agent-registry ai-applications describe default --location=us-central1` |
+| "Search AI applications with display name Customer*" | `gcloud agent-registry ai-applications search --location=us-central1 --search-string="displayName:Customer*"` |
+| "List agents under the default AI application" | `gcloud agent-registry ai-applications agents list --ai-application=default --location=us-central1` |
+| "List MCP servers under AI application my-ai-app" | `gcloud agent-registry ai-applications mcp-servers list --ai-application=my-ai-app --location=us-central1` |
+| "Get IAM policy for AI application my-ai-app" | `gcloud agent-registry ai-applications get-iam-policy my-ai-app --location=us-central1` |
+| "Grant group ai-team@example.com viewer access on AI application my-ai-app" | `gcloud agent-registry ai-applications add-iam-policy-binding my-ai-app --location=us-central1 --member="group:ai-team@example.com" --role="roles/agentregistry.viewer"` |
+| "Set IAM policy on AI application my-ai-app from policy.yaml" | `gcloud agent-registry ai-applications set-iam-policy my-ai-app policy.yaml --location=us-central1` |
 | "Configure folder 849163983723 boundary config to use environment tag" | `gcloud resource-manager boundary-configs update --folder=849163983723 --tag-key="975672035171/environment"` |
 | "Create a capability config for agent management on folder 849163983723" | `gcloud resource-manager capability-configs create agent-governance --folder=849163983723 --display-name="Agent Governance Capability" --types=agent-management --management-project=projects/1066599796742` |
 | "Create a dev boundary under folder 849163983723 for environment=dev" | `gcloud resource-manager boundaries create agents-dev --folder=849163983723 --display-name="Agent Dev Boundary" --tag-key="975672035171/environment" --tag-value="dev"` |
