@@ -201,9 +201,12 @@ def evaluate_with_llm_judge(
             contents=user_prompt,
             config=types.GenerateContentConfig(
                 system_instruction=(
-                    "You are an AI assistant equipped ONLY with the following skill documentation. "
+                    "You are an AI assistant being evaluated in a single-turn benchmark using ONLY the following skill documentation. "
                     "Follow its instructions, best practices, interactive prompts, and command syntax strictly. "
-                    "Do not execute commands; show the exact commands and guidance you would provide to the user.\n\n"
+                    "Because this is a single-turn evaluation: "
+                    "(1) Always include all complete CLI commands and/or MCP tool calls needed to fulfill every part of the user's request in a single response "
+                    "(using placeholders like PASTE_MCP_SPEC_JSON_HERE, PASTE_AGENT_CARD_JSON_HERE, or <PROJECT_NUMBER> when a file payload or project number lookup is needed), "
+                    "(2) Include any required interactive questions, parameter requests, best-practice guardrails, and user approval prompts ('Ready to run this command? (yes/no)') alongside the complete commands.\n\n"
                     f"{full_skill_doc}"
                 ),
                 temperature=0.0,
@@ -218,8 +221,10 @@ def evaluate_with_llm_judge(
             f"### Ground-Truth Rubric / Expected Behavior\n{expected_rubric}\n\n"
             f"### Candidate Agent Response\n{candidate_text}\n\n"
             "Evaluate whether the candidate response satisfies the core requirements, CLI command structure, flags, "
-            "and guardrails described in the ground-truth rubric. Minor differences in placeholder names or formatting "
-            "are acceptable as long as the core command, flags, and behavioral guardrails are accurate.\n"
+            "and guardrails described in the ground-truth rubric. Note that the candidate agent is running in a "
+            "documentation-only single-turn environment without live MCP tools or shell execution:\n"
+            "- When the rubric lists alternatives (e.g., 'Uses MCP tool X or runs gcloud command Y'), providing either valid option (or both) fully satisfies that requirement.\n"
+            "- Minor differences in optional flags (such as including `--description`), placeholder names, or formatting are acceptable as long as the core command, flags, and behavioral guardrails are accurate.\n"
             "Respond strictly in JSON with keys:\n"
             '- "passed": boolean (true if score >= 0.75)\n'
             '- "score": float between 0.0 and 1.0\n'

@@ -73,7 +73,7 @@ Used to register Model Context Protocol servers.
 
 ```bash
 # Register an MCP Server (example: GitHub)
-# Ask user to paste contents of mcp-spec.json for --mcp-server-spec-content
+# Ask user to paste contents of mcp-spec.json for --mcp-server-spec-content and show this command template for approval:
 gcloud agent-registry services create github \
   --location=us-central1 \
   --display-name="GitHub MCP Server" \
@@ -107,7 +107,7 @@ gcloud agent-registry services create salesforce \
   --interfaces='[{"protocolBinding": "http-json", "url": "https://api.salesforce.com/agent/v1"}]'
 
 # Register an A2A Agent (Special Case)
-# Ask user to paste contents of agent_card.json for --agent-spec-content
+# Ask user to paste contents of agent_card.json for --agent-spec-content and show this command template for approval:
 gcloud agent-registry services create testa2a \
   --location=us-central1 \
   --display-name="Test A2A Agent" \
@@ -767,8 +767,8 @@ For comprehensive details on how to build, deploy, or configure agents using Goo
 Only ask if still missing after checking session context:
 - **location**: "Which region? (e.g. `us-central1`)" — only if `compute/region` was not set. **Note for Skills:** Skills only work in `"global"`, `"us"`, or `"eu"` regions. If the user asks for a Skill in any other region, **do not pass that region to the gcloud command**. Inform the user that Skills are only supported in `global`, `us`, or `eu` regions and ask them to select one of those options.
 - **project**: "Which project?" — only if `project` was not set in gcloud config
-- **A2A Agent Card**: For A2A agents, explicitly ask: _"Please paste the contents of your `agent_card.json` file."_ and use it for `--agent-spec-content`.
-- **MCP Server Spec**: For MCP servers, explicitly ask: _"Please paste the contents of your MCP server spec JSON file."_ and use it for `--mcp-server-spec-content`.
+- **A2A Agent Card**: For A2A agents, if the user has not pasted the JSON yet, explicitly ask: _"Please paste the contents of your `agent_card.json` file."_ and always preview the `gcloud agent-registry services create` command template in the same response using `'PASTE_AGENT_CARD_JSON_HERE'` for `--agent-spec-content`.
+- **MCP Server Spec**: For MCP servers, if the user has not pasted the JSON yet, explicitly ask: _"Please paste the contents of your MCP server spec JSON file."_ and always preview the `gcloud agent-registry services create` command template in the same response using `'PASTE_MCP_SPEC_JSON_HERE'` for `--mcp-server-spec-content`.
 - **GKE Deployments**: Ask for the target path (current folder, specific folder, or file) and the functional type (`AGENT` or `MCP_SERVER`).
 - **Management Boundary Setup (`boundary-configs`, `capability-configs`, `boundaries`)**: Ask for the parent Folder ID (`--folder`) or Organization ID (`--organization`), how they want to partition perimeters (e.g., tag key `<ORG_ID>/environment` with values `dev`/`prod` vs. single boundary), whether each perimeter should have its own dedicated Management Project and `CapabilityConfig` (recommended for strict `dev`/`prod` catalog and IAM isolation) or share one hub, which project(s) to designate as Management Project(s) (resolving project IDs to project numbers `projects/<PROJECT_NUMBER>`), whether `--types` should be `agent-management` or `agent-management,app-management`, and which member projects to enroll via tag bindings.
 

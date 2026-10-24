@@ -198,17 +198,18 @@ def generate_markdown_report(reports: list[dict[str, Any]], use_llm_judge: bool 
 
         if r["cases"]:
             md.append("<details><summary><b>View " + str(len(r["cases"])) + " Test Cases</b></summary>\n")
-            md.append("| Test Case ID | Status | Prompt Scenario | Ground Truth Expectation |")
-            md.append("|---|:---:|---|---|")
+            md.append("| Test Case ID | Status | Score | Prompt Scenario | Evaluation Notes |")
+            md.append("|---|:---:|:---:|---|---|")
             for c in r["cases"]:
                 c_badge = "✅" if c.get("status") == "PASS" else ("⚠️" if c.get("status") == "SKIPPED_NO_KEY" else "❌")
+                c_score = f"{c['score']:.2f}" if c.get("score") is not None else "N/A"
                 prompt_snippet = c["prompt"].replace("\n", " ")
                 if len(prompt_snippet) > 80:
                     prompt_snippet = prompt_snippet[:77] + "..."
-                expected_snippet = c["expected"].replace("\n", " ")
-                if len(expected_snippet) > 100:
-                    expected_snippet = expected_snippet[:97] + "..."
-                md.append(f"| `{c['id']}` | {c_badge} | {prompt_snippet} | {expected_snippet} |")
+                notes_snippet = (c.get("reason") or c["expected"]).replace("\n", " ")
+                if len(notes_snippet) > 120:
+                    notes_snippet = notes_snippet[:117] + "..."
+                md.append(f"| `{c['id']}` | {c_badge} | {c_score} | {prompt_snippet} | {notes_snippet} |")
             md.append("\n</details>\n")
 
     return "\n".join(md)

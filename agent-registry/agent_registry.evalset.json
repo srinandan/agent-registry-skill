@@ -11,7 +11,7 @@
           "userContent": {
             "parts": [
               {
-                "text": "I want to register a new GitHub MCP server in us-central1 at https://api.github.com/mcp using jsonrpc and my tool spec JSON file."
+                "text": "I want to register a new GitHub MCP server in us-central1 at https://api.github.com/mcp using jsonrpc and my tool spec JSON file. Show me the gcloud command I'll run and let me know what you need from my spec file."
               }
             ]
           },
@@ -161,7 +161,7 @@
           "userContent": {
             "parts": [
               {
-                "text": "Register a new A2A agent called fraud-sentinel in us-central1."
+                "text": "Register a new A2A agent called fraud-sentinel (display name 'Fraud Sentinel Agent') in us-central1 using my agent_card.json file, and show me the gcloud command."
               }
             ]
           },
@@ -311,14 +311,14 @@
           "userContent": {
             "parts": [
               {
-                "text": "Search for agents in us-central1 whose skill description mentions MedDRA."
+                "text": "Can I use a suffix wildcard like skills.description:MedDRA* to search for agents in us-central1 whose skill description mentions MedDRA?"
               }
             ]
           },
           "finalResponse": {
             "parts": [
               {
-                "text": "Uses token match `--search-string=\"skills.description:MedDRA\"` on `gcloud agent-registry agents search --location=us-central1` (or `mcp_agentregistry_search_agents`) and notes that suffix wildcard `*` is not supported on `skills.description`."
+                "text": "Explains that suffix wildcard `*` is not supported on `skills.description`, and uses token match `--search-string=\"skills.description:MedDRA\"` on `gcloud agent-registry agents search --location=us-central1` (or `mcp_agentregistry_search_agents`)."
               }
             ]
           },
@@ -348,7 +348,7 @@
           "finalResponse": {
             "parts": [
               {
-                "text": "Shows `gcloud agent-registry services create gemini-models --location=us-central1 --display-name=\"Vertex AI Model Garden\" --endpoint-spec-type=no-spec --interfaces='[{\"protocolBinding\": \"jsonrpc\", \"url\": \"https://us-central1-aiplatform.googleapis.com/v1beta1/publishers/*/models\"}]'` and `gcloud agent-registry services update gemini-models --display-name=\"Model Garden on Vertex AI\" --location=us-central1`, requesting user approval before executing each mutating command."
+                "text": "Shows `gcloud agent-registry services create gemini-models --location=us-central1 --display-name=\"Vertex AI Model Garden\" --endpoint-spec-type=no-spec --interfaces='[{\"protocolBinding\": \"jsonrpc\", \"url\": \"https://us-central1-aiplatform.googleapis.com/v1beta1/publishers/*/models\"}]'` and `gcloud agent-registry services update gemini-models --display-name=\"Model Garden on Vertex AI\" --location=us-central1`, requesting user approval before executing the mutating commands."
               }
             ]
           },
@@ -641,14 +641,14 @@
           "userContent": {
             "parts": [
               {
-                "text": "Create a capability config called agent-governance under folder 849163983723 using my existing project ID agent-registry-demo-1 as the management project."
+                "text": "Create a capability config called agent-governance (display name 'Agent Governance Capability') under folder 849163983723 using my existing project ID agent-registry-demo-1 as the management project. Can I pass the project ID directly to --management-project?"
               }
             ]
           },
           "finalResponse": {
             "parts": [
               {
-                "text": "Explains that CRM v3 requires the project number (`projects/<PROJECT_NUMBER>`) rather than the project ID for `--management-project`, resolves the project number via `gcloud projects describe agent-registry-demo-1 --format=\"value(projectNumber)\"`, and constructs `gcloud resource-manager capability-configs create agent-governance --folder=849163983723 --display-name=\"...\" --types=agent-management --management-project=projects/<PROJECT_NUMBER>`."
+                "text": "Explains that CRM v3 requires the project number (`projects/<PROJECT_NUMBER>`) rather than the project ID for `--management-project`, resolves the project number via `gcloud projects describe agent-registry-demo-1 --format=\"value(projectNumber)\"`, and constructs `gcloud resource-manager capability-configs create agent-governance --folder=849163983723 --display-name=\"Agent Governance Capability\" --types=agent-management --management-project=projects/<PROJECT_NUMBER>`."
               }
             ]
           },
@@ -671,7 +671,7 @@
           "userContent": {
             "parts": [
               {
-                "text": "In my management project agent-registry-demo-1, how do I list or search only the agents that were discovered from spoke project 220378623452 in us-central1?"
+                "text": "In my management project agent-registry-demo-1, is there a --boundary flag on gcloud agent-registry, and how do I list or search only the agents that were discovered from spoke project 220378623452 in us-central1?"
               }
             ]
           },
