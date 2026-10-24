@@ -15,6 +15,7 @@ A skill for the Gemini CLI and AI agents to interact with Google Cloud's Agent R
 - **Python ADK Integration**: Specialized support and snippets for the Google Agent Development Kit (ADK).
 - **GKE Based Agents**: Support for configuring Kubernetes Deployments to act as Agents or MCP Servers.
 - **Skills Management**: Built-in support for exploring and managing Skills and Skill Revisions using `gcloud alpha agent-registry skills`.
+- **Management Boundary Governance**: Interactive guidance and best practices for Agent Registry administrators to configure hub-and-spoke perimeters (`BoundaryConfig`, `CapabilityConfig`, `Boundary`, and Tag Bindings) and verify cross-project agent discovery.
 
 ## Installation
 
@@ -37,6 +38,8 @@ Once installed, you can talk to Gemini in natural language:
 -   *"Show agents with identity matching 'my-service-sa'"*
 -   *"Which MCP Server has a tool named search_documents?"*
 -   *"List agents based on reasoning engine in us-central1"*
+-   *"Help me set up a management boundary for dev and prod under folder 849163983723"*
+-   *"Create a capability config and boundary for agent management"*
 
 ## Prerequisites
 

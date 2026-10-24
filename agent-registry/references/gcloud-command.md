@@ -476,3 +476,205 @@ COMMANDS
      list
         (ALPHA) List skillRevisions.
 ```
+
+---
+
+## Cloud Resource Manager: Management Boundary Commands
+
+Documentation for `gcloud resource-manager boundary-configs`, `gcloud resource-manager capability-configs`, and `gcloud resource-manager boundaries`.
+
+### `boundary-configs`
+
+```text
+NAME
+    gcloud resource-manager boundary-configs - manage Resource Manager boundary
+        configurations
+
+SYNOPSIS
+    gcloud resource-manager boundary-configs COMMAND [GCLOUD_WIDE_FLAG ...]
+
+DESCRIPTION
+    Commands to describe and update Resource Manager boundary configurations.
+
+COMMANDS
+    COMMAND is one of the following:
+
+     describe
+        Describe a boundary configuration.
+
+     update
+        Update a boundary configuration.
+```
+
+#### `update`
+
+```text
+NAME
+    gcloud resource-manager boundary-configs update - update a boundary
+        configuration
+
+SYNOPSIS
+    gcloud resource-manager boundary-configs update
+        (--clear-tag-key | --tag-key=TAG_KEY)
+        (--folder=FOLDER_ID | --organization=ORGANIZATION_ID) [--async]
+        [--etag=ETAG] [GCLOUD_WIDE_FLAG ...]
+
+EXAMPLES
+    To update the tag key of the boundary configuration in a folder with ID
+    849163983723, run:
+
+        $ gcloud resource-manager boundary-configs update \
+            --folder=849163983723 --tag-key="975672035171/environment"
+```
+
+---
+
+### `capability-configs`
+
+```text
+NAME
+    gcloud resource-manager capability-configs - manage Cloud Resource Manager
+        CapabilityConfigs
+
+SYNOPSIS
+    gcloud resource-manager capability-configs COMMAND [GCLOUD_WIDE_FLAG ...]
+
+DESCRIPTION
+    A CapabilityConfig allows managing experiences like applications and agents
+    on a logical administrative perimeter of Projects (Boundary).
+
+COMMANDS
+    COMMAND is one of the following:
+
+     create
+        Create a CapabilityConfig under a parent Organization, Folder, or
+        Project.
+
+     delete
+        Delete a CapabilityConfig.
+
+     describe
+        Describe a CapabilityConfig.
+
+     list
+        List CapabilityConfigs that are direct children of a parent resource.
+
+     update
+        Update a CapabilityConfig.
+```
+
+#### `create`
+
+```text
+NAME
+    gcloud resource-manager capability-configs create - create a
+        CapabilityConfig under a parent Organization, Folder, or Project
+
+SYNOPSIS
+    gcloud resource-manager capability-configs create
+        (CAPABILITY_CONFIG
+          : --folder=FOLDER --organization=ORGANIZATION --project=PROJECT)
+        --types=[TYPES,...] [--async] [--boundaries=[BOUNDARIES,...]]
+        [--display-name=DISPLAY_NAME] [--management-project=MANAGEMENT_PROJECT]
+        [GCLOUD_WIDE_FLAG ...]
+
+DESCRIPTION
+    Creating a CapabilityConfig triggers the creation of a Management Project
+    if one is not supplied via --management-project.
+
+REQUIRED FLAGS
+     --types=[TYPES,...]
+        Comma-separated list of CapabilityConfig types (e.g. app-management,
+        agent-management). TYPES must be one of: app-management,
+        agent-management.
+
+OPTIONAL FLAGS
+     --boundaries=[BOUNDARIES,...]
+        List of Boundaries associated with this CapabilityConfig.
+
+     --display-name=DISPLAY_NAME
+        Human-readable display name of the CapabilityConfig (4 to 30
+        characters).
+
+     --management-project=MANAGEMENT_PROJECT
+        Management Project associated with this CapabilityConfig (e.g.
+        projects/1066599796742). Must use the project number.
+```
+
+#### `update`
+
+```text
+NAME
+    gcloud resource-manager capability-configs update - update a
+        CapabilityConfig
+
+SYNOPSIS
+    gcloud resource-manager capability-configs update
+        (CAPABILITY_CONFIG
+          : --folder=FOLDER --organization=ORGANIZATION --project=PROJECT)
+        [--async] [--display-name=DISPLAY_NAME] [--etag=ETAG]
+        [--types=[TYPES,...]]
+        [--boundaries=[BOUNDARIES,...] | --clear-boundaries]
+        [GCLOUD_WIDE_FLAG ...]
+
+DESCRIPTION
+    Updates the display name, types, or boundaries of an existing
+    CapabilityConfig.
+```
+
+---
+
+### `boundaries`
+
+```text
+NAME
+    gcloud resource-manager boundaries - manage Resource Manager boundaries
+
+SYNOPSIS
+    gcloud resource-manager boundaries COMMAND [GCLOUD_WIDE_FLAG ...]
+
+DESCRIPTION
+    Commands to create, describe, list, update, and delete Resource Manager
+    boundaries.
+
+COMMANDS
+    COMMAND is one of the following:
+
+     create
+        Create a new boundary.
+
+     delete
+        Delete a boundary.
+
+     describe
+        Describe a boundary.
+
+     list
+        List boundaries.
+
+     update
+        Update a boundary.
+```
+
+#### `create`
+
+```text
+NAME
+    gcloud resource-manager boundaries create - create a new boundary
+
+SYNOPSIS
+    gcloud resource-manager boundaries create
+        (BOUNDARY : --folder=FOLDER --organization=ORGANIZATION) [--async]
+        [--display-name=DISPLAY_NAME] [--tag-key=TAG_KEY]
+        [--tag-value=TAG_VALUE] [GCLOUD_WIDE_FLAG ...]
+
+FLAGS
+     --display-name=DISPLAY_NAME
+        Friendly display name to use for the boundary.
+
+     --tag-key=TAG_KEY
+        The namespaced name of the tag key (e.g. 975672035171/environment).
+
+     --tag-value=TAG_VALUE
+        The short name of the tag value (e.g. dev or prod).
+```
