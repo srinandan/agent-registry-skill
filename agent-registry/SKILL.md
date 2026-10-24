@@ -13,6 +13,7 @@ description: >
   resource-level IAM policies, or management boundaries in Google Cloud Agent Registry.
   Also triggers on requests to integrate or use the Google Agent Development Kit (ADK)
   with the Agent Registry.
+license: Apache-2.0
 metadata:
   author: srinandan
   version: "0.8.0"
