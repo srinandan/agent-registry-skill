@@ -5,6 +5,19 @@ All notable changes to the Google Cloud Agent Registry Skill are recorded here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); this
 project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.0] - 2026-10-26
+
+### Added
+- **Cloud Run Automatic Registration (`--functional-type` & `--identity-type`)**:
+  - Added Section 5 (`Cloud Run Agents & MCP Servers (Automatic Registration via --functional-type)`) to [`agent-registry/SKILL.md`](agent-registry/SKILL.md) and CLI reference documentation to [`agent-registry/references/gcloud-command.md`](agent-registry/references/gcloud-command.md) covering `gcloud beta run deploy`, `gcloud beta run services update`, `gcloud beta run multi-region-services update`, and `gcloud beta run jobs {create,deploy,update}`.
+  - Documented configuration behavior and guardrails: `--functional-type=agent` requires `--identity-type=agent-identity`, `--functional-type=mcp-server` is supported on Cloud Run services only (Cloud Run jobs cannot act as MCP servers), `--functional-type` and `--identity-type` are immutable once configured, and updating an existing service to `--identity-type=agent-identity` should use `--no-traffic` to pre-stage IAM roles on the new Agent Identity principal (`principal://agents.global.org-ORGANIZATION_ID.system.id.goog/...`).
+- **Expanded GKE Agent & MCP Server Automatic Registration**:
+  - Expanded Section 4 (`GKE Agents & MCP Servers (Automatic Registration)`) in [`agent-registry/SKILL.md`](agent-registry/SKILL.md) with complete `Deployment` and `Service` YAML manifests and required labels/annotations: `registry.gke.io/functional-type: "AGENT" | "MCP_SERVER"` in `metadata.labels` (plus backward-compatible `apphub.cloud.google.com/functional-type` in `metadata.annotations`), `a2a-protocol.org/agent-card` for A2A Agent Card discovery on GKE Agents, `modelcontextprotocol.info/urls` and `modelcontextprotocol.info/capabilities` for GKE MCP Servers, and `iam.gke.io/spiffe-identity-type: agent-identity` on the Pod template.
+  - Updated [`agent-registry/scripts/annotate_gke.py`](agent-registry/scripts/annotate_gke.py) to set both `registry.gke.io/functional-type` under `metadata.labels` and `apphub.cloud.google.com/functional-type` under `metadata.annotations`.
+- **Official Documentation Fallback (`developerknowledge` MCP Server)**:
+  - Added workflow step, error-handling step, and a dedicated **Documentation Fallback (`developerknowledge` MCP Server)** section to [`agent-registry/SKILL.md`](agent-registry/SKILL.md) instructing agents to query `search_documents` (`mcp_developerknowledge_search_documents`), `get_documents` (`mcp_developerknowledge_get_documents`), and `answer_query` (`mcp_developerknowledge_answer_query`) against canonical `documents/docs.cloud.google.com/agent-registry/...` and `documents/docs.cloud.google.com/run/docs/ai/agent-platform-features` docs when handling unfamiliar flags, schemas, or troubleshooting questions.
+  - Expanded [`agent-registry/agent_registry.evalset.json`](agent-registry/agent_registry.evalset.json) to 34 evaluation cases covering Cloud Run `--functional-type`, GKE Agent/MCP Server manifests, and `developerknowledge` MCP fallback.
+
 ## [0.8.1] - 2026-10-24
 
 ### Added

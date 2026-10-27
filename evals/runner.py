@@ -73,7 +73,7 @@ def _extract_anchor_tokens(expected_text: str) -> list[str]:
             anchors.append(token)
         elif token.startswith("--") and "=" in token:
             anchors.append(token.split("=")[0])
-        elif token.startswith("mcp_agentregistry_"):
+        elif token.startswith(("mcp_agentregistry_", "mcp_developerknowledge_")):
             anchors.append(token)
     return anchors
 
@@ -194,7 +194,12 @@ def evaluate_with_llm_judge(
     from google import genai
     from google.genai import types
 
-    client = genai.Client(api_key=api_key)
+    if api_key == "vertexai" or os.environ.get("GOOGLE_GENAI_USE_VERTEXAI", "").lower() in ("1", "true"):
+        project = os.environ.get("GOOGLE_CLOUD_PROJECT", "srinandans-next25-demo")
+        location = os.environ.get("GOOGLE_CLOUD_LOCATION", "us-central1")
+        client = genai.Client(vertexai=True, project=project, location=location)
+    else:
+        client = genai.Client(api_key=api_key)
     sys_instruction = (
         "You are an AI assistant being evaluated in a single-turn benchmark using ONLY the following skill documentation. "
         "Follow its instructions, best practices, interactive prompts, and command syntax strictly. "
@@ -212,13 +217,13 @@ def evaluate_with_llm_judge(
         expected_rubric = inv.final_response.parts[0].text or ""
 
         best_result: EvalCaseResult | None = None
-        for _attempt in range(2):
+        for _attempt in range(3):
             candidate_resp = client.models.generate_content(
                 model=model,
                 contents=user_prompt,
                 config=types.GenerateContentConfig(
                     system_instruction=sys_instruction,
-                    temperature=0.0,
+                    temperature=0.0 if _attempt == 0 else 0.2,
                 ),
             )
             candidate_text = candidate_resp.text or ""
