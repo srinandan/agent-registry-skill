@@ -1,7 +1,7 @@
 {
   "eval_set_id": "agent-registry",
   "name": "agent-registry",
-  "description": "Comprehensive ADK evaluation suite for the Google Cloud Agent Registry skill, covering MCP servers, Agents, Endpoints, Bindings, GKE annotations, Skills (Alpha), Dashboards, Python ADK integration, and Management Boundary setup and governance.",
+  "description": "Comprehensive ADK evaluation suite for the Google Cloud Agent Registry skill, covering MCP servers, Agents, Endpoints, Bindings, GKE and Cloud Run automatic registration (--functional-type), Skills (Alpha), Dashboards, Python ADK integration, Management Boundary setup and governance, AI Applications, Resource-level IAM policies, Quick Add GCP Service, and developerknowledge MCP fallback.",
   "eval_cases": [
     {
       "evalId": "register_mcp_server_tool_spec",
@@ -378,7 +378,7 @@
           "finalResponse": {
             "parts": [
               {
-                "text": "Uses `./scripts/annotate_gke.py ./k8s/deployment.yaml --type AGENT` to add the `apphub.cloud.google.com/functional-type` annotation to the Kubernetes YAML file."
+                "text": "Uses `./scripts/annotate_gke.py ./k8s/deployment.yaml --type AGENT` to add the `registry.gke.io/functional-type` label (under `metadata.labels`) and `apphub.cloud.google.com/functional-type` annotation (under `metadata.annotations`) to the Kubernetes YAML file."
               }
             ]
           },
@@ -919,6 +919,96 @@
             "parts": [
               {
                 "text": "Explains the 5 endpoint URL variants required for a Governed Target GCP Service behind Agent Gateway—Base (`https://aiplatform.googleapis.com`), Base mTLS (`https://aiplatform.mtls.googleapis.com`), Locational (`https://us-east7-aiplatform.googleapis.com`), Locational mTLS (`https://us-east7-aiplatform.mtls.googleapis.com`), and Regional REP (`https://aiplatform.us-east7.rep.googleapis.com`)—provides `./scripts/quick-add-gcp-service.sh --service=aiplatform --location=us-east7 --project=ag-prod-test4` and/or the 5 `gcloud agent-registry services create` commands (`aiplatform`, `aiplatform-mtls`, `us-east7-aiplatform`, `us-east7-aiplatform-mtls`, `aiplatform-us-east7-rep` with `--endpoint-spec-type=no-spec`), reminds the user to bind `roles/iap.egressor` to the Agent Identity, and requests user confirmation before running mutating commands."
+              }
+            ]
+          },
+          "creationTimestamp": 0.0
+        }
+      ],
+      "sessionInput": {
+        "appName": "agent-registry",
+        "userId": "eval_user",
+        "state": {}
+      },
+      "creationTimestamp": 0.0,
+      "finalSessionState": {}
+    },
+    {
+      "evalId": "cloud_run_register_agent_and_mcp_server",
+      "conversation": [
+        {
+          "invocationId": "",
+          "userContent": {
+            "parts": [
+              {
+                "text": "How do I deploy or update a Cloud Run service or job in us-central1 to register it automatically as an Agent or an MCP Server in Agent Registry using the --functional-type flag?"
+              }
+            ]
+          },
+          "finalResponse": {
+            "parts": [
+              {
+                "text": "Provides the `gcloud beta run` commands (requesting user approval before mutating steps): (1) for an Agent service: `gcloud beta run deploy SERVICE_NAME --image=IMAGE_URL --region=us-central1 --functional-type=agent --identity-type=agent-identity` and `gcloud beta run services update SERVICE_NAME --region=us-central1 --functional-type=agent --identity-type=agent-identity --no-traffic` (noting `--identity-type=agent-identity` is required when `--functional-type=agent` and recommending `--no-traffic` to pre-stage IAM roles on the new Agent Identity principal), (2) for an MCP Server service: `gcloud beta run deploy SERVICE_NAME --image=IMAGE_URL --region=us-central1 --functional-type=mcp-server` or `gcloud beta run services update SERVICE_NAME --region=us-central1 --functional-type=mcp-server`, and (3) for an Agent job: `gcloud beta run jobs create JOB_NAME --image=IMAGE_URL --region=us-central1 --functional-type=agent --identity-type=agent-identity` (noting Cloud Run jobs only support `--functional-type=agent` and cannot act as MCP servers, and that `--functional-type` and `--identity-type` are immutable once set)."
+              }
+            ]
+          },
+          "creationTimestamp": 0.0
+        }
+      ],
+      "sessionInput": {
+        "appName": "agent-registry",
+        "userId": "eval_user",
+        "state": {}
+      },
+      "creationTimestamp": 0.0,
+      "finalSessionState": {}
+    },
+    {
+      "evalId": "gke_register_agent_and_mcp_server_manifests",
+      "conversation": [
+        {
+          "invocationId": "",
+          "userContent": {
+            "parts": [
+              {
+                "text": "What Kubernetes labels and annotations do I need on my GKE Deployment manifests to automatically register an A2A Agent and an MCP Server in Agent Registry?"
+              }
+            ]
+          },
+          "finalResponse": {
+            "parts": [
+              {
+                "text": "Explains the required GKE `Deployment` and Pod template metadata: (1) for a GKE Agent: `registry.gke.io/functional-type: \"AGENT\"` in `metadata.labels` (with backward compatibility for `apphub.cloud.google.com/functional-type: \"AGENT\"`), `a2a-protocol.org/agent-card` in `metadata.annotations` (`endpoint: /.well-known/agent-card.json`, `protocol: HTTP`, `port: 8080`), and `iam.gke.io/spiffe-identity-type: agent-identity` in `spec.template.metadata.annotations`; (2) for a GKE MCP Server: `registry.gke.io/functional-type: \"MCP_SERVER\"` in `metadata.labels` (with backward compatibility for `apphub.cloud.google.com/functional-type: \"MCP_SERVER\"`), `modelcontextprotocol.info/urls` and `modelcontextprotocol.info/capabilities` in `metadata.annotations`, and `iam.gke.io/spiffe-identity-type: agent-identity` in `spec.template.metadata.annotations`; plus optional use of `./scripts/annotate_gke.py`."
+              }
+            ]
+          },
+          "creationTimestamp": 0.0
+        }
+      ],
+      "sessionInput": {
+        "appName": "agent-registry",
+        "userId": "eval_user",
+        "state": {}
+      },
+      "creationTimestamp": 0.0,
+      "finalSessionState": {}
+    },
+    {
+      "evalId": "developerknowledge_mcp_fallback",
+      "conversation": [
+        {
+          "invocationId": "",
+          "userContent": {
+            "parts": [
+              {
+                "text": "If I ask about an Agent Registry feature, flag, or troubleshooting issue that isn't covered in the local skill documentation, how should the agent look up the official Google Cloud documentation?"
+              }
+            ]
+          },
+          "finalResponse": {
+            "parts": [
+              {
+                "text": "Falls back to querying the `developerknowledge` MCP server using `mcp_developerknowledge_search_documents` (`search_documents`) followed by `mcp_developerknowledge_get_documents` (`get_documents`, e.g., `documents/docs.cloud.google.com/agent-registry/automatic-registration`, `documents/docs.cloud.google.com/agent-registry/register-mcp-servers`, `documents/docs.cloud.google.com/agent-registry/troubleshooting`, or `documents/docs.cloud.google.com/run/docs/ai/agent-platform-features`) or `mcp_developerknowledge_answer_query` (`answer_query`), and cites the authoritative document URI or `documents/...` resource name."
               }
             ]
           },

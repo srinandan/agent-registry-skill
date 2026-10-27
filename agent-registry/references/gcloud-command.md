@@ -857,3 +857,81 @@ FLAGS
      --tag-value=TAG_VALUE
         The short name of the tag value (e.g. dev or prod).
 ```
+
+---
+
+## Cloud Run: Agent Registry Automatic Registration Flags (`gcloud beta run`)
+
+Documentation for `gcloud beta run deploy`, `gcloud beta run services update`, `gcloud beta run multi-region-services update`, and `gcloud beta run jobs (create | deploy | update)` flags used to automatically register Cloud Run resources in Agent Registry.
+
+### `deploy` / `services update` / `multi-region-services update`
+
+```text
+SYNOPSIS
+    gcloud beta run deploy [[SERVICE] --namespace=NAMESPACE]
+        [--image=IMAGE_URL | --source=SOURCE] [--region=REGION]
+        [--functional-type=FUNCTIONAL_TYPE] [--identity-type=IDENTITY_TYPE]
+        [--[no-]identity-certificate] [GCLOUD_WIDE_FLAG ...]
+
+    gcloud beta run services update [SERVICE] [--region=REGION]
+        [--functional-type=FUNCTIONAL_TYPE] [--identity-type=IDENTITY_TYPE]
+        [--[no-]identity-certificate] [--no-traffic] [GCLOUD_WIDE_FLAG ...]
+
+FLAGS
+     --functional-type=FUNCTIONAL_TYPE
+        Specifies the function of the resource for automatic registration in
+        Agent Registry (sets annotation apphub.cloud.google.com/functional-type).
+        Once configured on a resource, this property is immutable and cannot be
+        changed or cleared. FUNCTIONAL_TYPE must be one of:
+
+         agent
+            Registers the resource as an AI agent in Agent Registry. Requires
+            --identity-type=agent-identity.
+         mcp-server
+            Registers the resource as a Model Context Protocol (MCP) server in
+            Agent Registry.
+
+     --identity-type=IDENTITY_TYPE
+        Configures the type of identity assigned to the resource. Once set,
+        this property is immutable and cannot be changed or unset.
+        IDENTITY_TYPE must be one of:
+
+         agent-identity
+            Assigns a SPIFFE agent identity (required when --functional-type=agent).
+         service-account
+            Uses a standard Google Cloud service account (default for mcp-server).
+
+     --[no-]identity-certificate
+        Enables automatic provisioning of identity certificates from the trust
+        domain into the container environment (enabled by default when
+        --identity-type=agent-identity). Use --no-identity-certificate to opt out.
+```
+
+### `jobs create` / `jobs deploy` / `jobs update`
+
+```text
+SYNOPSIS
+    gcloud beta run jobs (create | deploy | update) [JOB] [--image=IMAGE_URL]
+        [--region=REGION] [--functional-type=agent]
+        [--identity-type=agent-identity] [--[no-]identity-certificate]
+        [GCLOUD_WIDE_FLAG ...]
+
+FLAGS
+     --functional-type=FUNCTIONAL_TYPE
+        Specifies the function of the job for automatic registration in Agent
+        Registry. Once configured on a resource, this property is immutable and
+        cannot be changed or cleared. Note: Only Cloud Run services can act as
+        MCP servers; Cloud Run jobs only support:
+
+         agent
+            Registers the job as an AI agent in Agent Registry. Requires
+            --identity-type=agent-identity.
+```
+
+### Viewing Assigned Agent Identity (`revisions describe` / `jobs executions describe`)
+
+```text
+SYNOPSIS
+    gcloud beta run revisions describe REVISION_NAME [--region=REGION]
+    gcloud beta run jobs executions describe EXECUTION_NAME [--region=REGION]
+```

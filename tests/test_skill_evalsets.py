@@ -109,3 +109,29 @@ def test_report_generation_warning_banner_without_api_key(monkeypatch):
     assert "evaluated heuristically; LLM judge skipped" in md_report
     assert "🔍 Heuristic" in md_report
     assert "`agent-registry`" in md_report
+
+
+def test_annotate_gke_sets_label_and_annotation():
+    """Verifies annotate_gke.py sets both registry.gke.io/functional-type label and apphub annotation."""
+    import importlib.util
+
+    script_path = REPO_ROOT / "agent-registry" / "scripts" / "annotate_gke.py"
+    spec = importlib.util.spec_from_file_location("annotate_gke", script_path)
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    sample_yaml = """apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-mcp-server
+spec:
+  replicas: 1
+"""
+    updated = module.process_yaml(sample_yaml, "MCP_SERVER")
+    assert 'registry.gke.io/functional-type: "MCP_SERVER"' in updated
+    assert 'apphub.cloud.google.com/functional-type: "MCP_SERVER"' in updated
+
+    # Idempotence check
+    assert module.process_yaml(updated, "MCP_SERVER") == updated
+
